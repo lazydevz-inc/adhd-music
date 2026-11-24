@@ -7,6 +7,9 @@
 #   Scripts/build-app.sh --share    → dist/share/<name>.app: the free build for other Macs (name and id in
 #                                     Scripts/share/share.env; Scripts/package-share.sh notarizes it into a dmg).
 #                                     The only build with Sparkle (silent daily updates, -D SPARKLE, Updates.swift).
+#                                     From 1.0.1 (SHARE_SANDBOX=1) sandboxed like --mas: same data folder in
+#                                     ~/Library/Containers/<id>, earlier data moved in on first launch
+#                                     (container-migration.plist), a signing rule both builds meet (shared permission).
 #   Scripts/build-app.sh --mas      → dist/mas/<name>.app: the Mac App Store build (Scripts/mas/mas.env). Same
 #                                     songs and sounds as --share, compiled with -D MAS_BUILD: no private TCC
 #                                     calls, no developer launch options, 'Open at login' off until turned on,
@@ -126,6 +129,9 @@ if [[ "$mode" == "share" ]]; then
   <key>SUVerifyUpdateBeforeExtraction</key><true/>
   <key>SURequireSignedFeed</key><true/>
   <key>SUEnableSystemProfiling</key><false/>"
+  # Sandboxed: Sparkle installs through its launcher service (network access comes from the entitlement).
+  [[ "${SHARE_SANDBOX:-1}" == "1" ]] && extra_keys+="
+  <key>SUEnableInstallerLauncherService</key><true/>"
 elif [[ "$mode" == "mas" ]]; then
   # The keys Xcode writes into every app it builds; App Store Connect reads them to know the tools
   # behind a build. No encryption beyond what macOS provides, so no export question on each upload.
@@ -209,6 +215,31 @@ cat > "$app/Contents/Resources/ko.lproj/InfoPlist.strings" <<STRINGS
 "NSAudioCaptureUsageDescription" = "$name은 유튜브 영상처럼 다른 앱에서 소리가 나는 동안 멈추고, 소리가 그치면 다시 틀어요. 아무것도 녹음하지 않아요.";
 STRINGS
 
+# Sandboxed builds: on first launch macOS copies the data an earlier unsandboxed website build (1.0 build 2) kept
+# in ~/Library/Application Support/<data folder>, and its settings, into the container both builds share.
+# Apple: "Migrating your app's files to its App Sandbox container". Nothing happens when there is nothing to copy.
+if [[ "$mode" == "mas" || ( "$mode" == "share" && "${SHARE_SANDBOX:-1}" == "1" ) ]]; then
+  data_folder=$(/usr/libexec/PlistBuddy -c 'Print :FocusDataFolder' "$app/Contents/Info.plist")
+  cat > "$app/Contents/Resources/container-migration.plist" <<MIGRATION
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Move</key>
+  <array>
+    <string>\${ApplicationSupport}/$data_folder</string>
+    <string>\${Library}/Preferences/\${BundleId}.plist</string>
+  </array>
+</dict></plist>
+MIGRATION
+  plutil -lint -s "$app/Contents/Resources/container-migration.plist"
+fi
+
+# A designated requirement the Developer ID copy and the Mac App Store copy both meet (Apple TN3127, the form
+# Xcode writes): macOS then lets either copy use the sound permission the other one got.
+write_requirement() { # bundle id, team id, file
+  print -r -- "designated => identifier \"$1\" and anchor apple generic and (certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = \"$2\")" > "$3"
+}
+
 if [[ "$mode" == "mas" ]]; then
   # Same songs as the website build, from their own cache so the two builds never share a folder mid-build.
   cache="$root/build/mas-library"
@@ -248,10 +279,23 @@ if [[ "$mode" == "share" ]]; then
   "${sign[@]}" "$fw/Versions/B/Updater.app"
   "${sign[@]}" "$fw"
 
-  # Developer ID + hardened runtime + secure timestamp: what notarization needs.
-  /usr/bin/codesign --force --options runtime --timestamp \
-    --entitlements "$root/Scripts/share/entitlements.plist" \
-    --sign "$SHARE_SIGN_IDENTITY" "$app"
+  # Developer ID + hardened runtime + secure timestamp: what notarization needs. Sandboxed from 1.0.1, with the
+  # bundle id in Sparkle's mach-lookup names and the requirement the App Store copy also meets.
+  # SHARE_SANDBOX=0 signs like 1.0 build 2 (no sandbox, codesign's default requirement), for update tests.
+  if [[ "${SHARE_SANDBOX:-1}" == "1" ]]; then
+    sign_dir=$(mktemp -d "${TMPDIR:-/tmp}/focus-share-sign.XXXXXX")
+    sed "s/__BUNDLE_ID__/$bundle_id/g" "$root/Scripts/share/entitlements-sandbox.plist" > "$sign_dir/entitlements.plist"
+    team=${${SHARE_SIGN_IDENTITY##*\(}%\)}
+    write_requirement "$bundle_id" "$team" "$sign_dir/requirement.txt"
+    /usr/bin/codesign --force --options runtime --timestamp \
+      --entitlements "$sign_dir/entitlements.plist" -r "$sign_dir/requirement.txt" \
+      --sign "$SHARE_SIGN_IDENTITY" "$app"
+    rm -rf "$sign_dir"
+  else
+    /usr/bin/codesign --force --options runtime --timestamp \
+      --entitlements "$root/Scripts/share/entitlements.plist" \
+      --sign "$SHARE_SIGN_IDENTITY" "$app"
+  fi
   /usr/bin/codesign --verify --strict --verbose=1 "$app"
   print -r -- "$app"
   exit 0

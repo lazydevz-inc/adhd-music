@@ -81,9 +81,9 @@ The script signs the app with your Apple Development certificate when you have o
 | `Scripts/build-app.sh --share` | the website build with automatic updates (see [Make the .dmg](#make-the-dmg)) |
 | `Scripts/build-app.sh --mas` | the Mac App Store build (see [Scripts/mas/README.md](Scripts/mas/README.md)) |
 
-Your own builds keep their records, likes, learning and song library apart from the downloaded app, which uses `~/Library/Application Support/ADHD Music/`.
+Your own builds keep their records, likes, learning and song library apart from the downloaded app, which keeps them in its sandbox container, `~/Library/Containers/app.adhdmusic.mac/` (from 1.0.1; version 1.0 used `~/Library/Application Support/ADHD Music/`, and 1.0.1 moves that folder into the container the first time it opens).
 
-To try things without touching your records, start the app with its own data folder. Other development options: `--mute`, `--volume 0.03`, `--autoplay`, `--seed-demo` (a sample day of history), `--open-panel`, `--lang ko`, `--dark`, `--preview <page>`, `--scenario`, `--sound-log`.
+To try things without touching your records, start the app with its own data folder. Other development options: `--mute`, `--volume 0.03`, `--autoplay`, `--seed-demo` (a sample day of history), `--open-panel`, `--lang ko`, `--dark`, `--preview <page>`, `--scenario`, `--sound-log`, `--print-data` (prints what a build sees in its data folder; handy for sandboxed builds).
 
 ```bash
 "dist/ADHD Music.app/Contents/MacOS/FocusMusic" --data-dir ~/adhd-music-test --seed-demo --open-panel

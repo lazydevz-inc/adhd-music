@@ -25,15 +25,22 @@ Test the store code with `--keep-dev-options` (its own id) instead.
 
 ## Status
 
-The store build is not released yet; the website build comes first. Keep `--mas` working, and keep the
-website build's Sparkle updater out of it (`package-mas.sh` refuses a build that has it).
+The store build is not released yet; the website build comes first. Both are free. 'Open at login': the website
+build turns it on at first launch; the store build starts with it off.
 
-Open before a store release, so both channels can be installed side by side:
-1. The System Audio Recording permission doesn't carry over between the two signatures (Developer ID vs store).
-2. Records, likes and learning split: the store build keeps them in its sandbox container, the website build in
-   ~/Library/Application Support/ADHD Music (a container-migration.plist, or one shared place).
-3. Two menu bar icons when both copies run: a single-instance check.
-4. 'Open at login' default for the website build (store build: off).
+Both channels side by side (website from 1.0.1 on):
+1. Same data: the website build is sandboxed too (Scripts/share/entitlements-sandbox.plist), so both use
+   ~/Library/Containers/app.adhdmusic.mac. A container-migration.plist in both builds moves what 1.0 build 2 kept in
+   ~/Library/Application Support/ADHD Music and ~/Library/Preferences/app.adhdmusic.mac.plist on first launch.
+2. Same sound permission: the website build is signed with the requirement Xcode writes (TN3127): Mac App Store
+   signature or this team's Developer ID. Apple re-signs store apps with a requirement of the same form, so either copy
+   meets the other's. Grants made by 1.0 build 2 keep that build's narrower requirement: those people are asked once
+   more if they switch to the store copy. package-mas.sh keeps Apple's default (a submission can't meet the
+   store-only branch itself).
+3. One copy at a time: a second launch quits at once (FocusMusicMain.anotherCopyIsRunning).
+4. Sparkle stays in the website build only; package-mas.sh refuses a build that has it.
+5. Opening the shared container with a copy signed another way (for example a development build) makes macOS ask
+   once ("differs from previously opened versions"); a store copy may do the same the first time.
 
 ## Sandbox test (macOS 26.2)
 

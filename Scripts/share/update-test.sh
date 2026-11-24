@@ -2,6 +2,8 @@
 # Local end-to-end check of the website build's automatic update (Sparkle), without touching /Applications,
 # the running app or real data:
 #   1. two builds of the website app with their own id (app.adhdmusic.mac.updatetest), data folder
+#      (the older one unsandboxed like 1.0 build 2, the newer one sandboxed like 1.0.1 on; see also
+#      sandbox-update-test.sh for the data move and a sandboxed copy updating itself),
 #      ("ADHD Music Update Test"), local feed (http://127.0.0.1:8765) and a throwaway EdDSA key;
 #      the older one signed only, the newer one notarized like a release (Scripts/package-share.sh)
 #   2. a local feed served with python3 -m http.server
@@ -46,6 +48,7 @@ SHARE_BUNDLE_ID="$id"
 SHARE_DATA_FOLDER="ADHD Music Update Test"
 SHARE_VERSION="$version"
 SHARE_BUILD="$build"
+SHARE_SANDBOX="$([[ $v == a ]] && print 0 || print 1)"
 SHARE_FEED_URL="http://127.0.0.1:$port/appcast.xml"
 SHARE_UPDATES_URL="http://127.0.0.1:$port/"
 SHARE_SPARKLE_PUBLIC_KEY="$public"

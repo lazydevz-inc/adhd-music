@@ -158,6 +158,14 @@ else
     --maximum-deltas "$SHARE_MAX_DELTAS" --maximum-versions 1 --auto-prune-update-files "$updates"
   feed="$updates/${SHARE_FEED_URL:t}"
   grep -q "<sparkle:version>$SHARE_BUILD</sparkle:version>" "$feed" || { print -u2 "Build $SHARE_BUILD is not in $feed"; exit 1; }
+  # Deltas are named after the app ("ADHD Music3-2.delta"), but GitHub stores release files with dots for spaces
+  # ("ADHD.Music3-2.delta") and SHARE_UPDATES_URL serves them from a GitHub release. Point the feed at the stored
+  # names, keep a copy under that name to upload, and sign the feed again.
+  if grep -q 'url="[^"]*%20' "$feed"; then
+    for delta in "$updates"/*\ *.delta(N); do cp -cf "$delta" "${delta:h}/${${delta:t}// /.}"; done
+    sed -i '' -E '/url="/ s/%20/./g' "$feed"
+    "$sparkle/bin/sign_update" "${key_args[@]}" "$feed"
+  fi
   # Checked as the app will check it: with the public key in Info.plist, the feed and every file it lists.
   swift "$root/Scripts/share/verify_feed.swift" "$SHARE_SPARKLE_PUBLIC_KEY" "$feed" "$updates" >&2
   print -u2 "Update feed: $feed"

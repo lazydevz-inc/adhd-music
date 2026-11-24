@@ -16,12 +16,52 @@ enum FocusMusicMain {
             print("login item: \(names[status] ?? "unknown(\(status.rawValue))")")
             exit(0)
         }
+        if CommandLine.arguments.contains("--print-data") {
+            printDataSummary()
+            exit(0)
+        }
         #endif
+        if anotherCopyIsRunning() { exit(0) }
         let app = NSApplication.shared
         let delegate = AppDelegate()
         app.delegate = delegate
         withExtendedLifetime(delegate) { app.run() }
     }
+
+    /// One copy at a time: the website and App Store builds share an id and a data folder, so a second copy
+    /// (both installed, or opened twice) would put a second icon in the menu bar and write the same records.
+    /// A copy that is just quitting (an update reopening the app) gets two seconds to go first.
+    private static func anotherCopyIsRunning() -> Bool {
+        guard let id = Bundle.main.bundleIdentifier else { return false }
+        let me = ProcessInfo.processInfo.processIdentifier
+        let deadline = Date().addingTimeInterval(2)
+        while true {
+            let others = NSRunningApplication.runningApplications(withBundleIdentifier: id)
+                .filter { $0.processIdentifier != me && !$0.isTerminated }
+            if others.isEmpty { return false }
+            if Date() >= deadline { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.25))
+        }
+    }
+
+    #if !MAS_BUILD || MAS_TEST
+    /// Development (`--print-data`): what this copy sees in its data folder and settings, printed and quit.
+    /// A sandboxed build reads its container, which a shell can't open without asking; this shows it instead.
+    private static func printDataSummary() {
+        let paths = AppPaths.resolve()
+        print("data folder: \(paths.dataDir.path)")
+        let files = (try? FileManager.default.contentsOfDirectory(at: paths.dataDir, includingPropertiesForKeys: [.fileSizeKey])) ?? []
+        for file in files.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+            let size = (try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+            print("  \(file.lastPathComponent) \(size) bytes")
+        }
+        print("library: \(paths.libraryDir.path)")
+        let defaults = UserDefaults.standard
+        for key in ["v2.language", "v2.volume", "v2.openAtLogin", "v2.pauseForOtherSound", "v2.noise"] {
+            print("  \(key) = \(defaults.object(forKey: key).map { "\($0)" } ?? "-")")
+        }
+    }
+    #endif
 }
 
 // MARK: - Menu bar icon (headset over a waveform)
