@@ -168,5 +168,3 @@ The website build updates itself with [Sparkle](https://sparkle-project.org) (MI
 ## License
 
 The code is under the MIT License (see [LICENSE](LICENSE)). The music, cover art, app icon, the images in `site/`, and the name and brand ADHD Music are not; see [ASSETS.md](ASSETS.md).
-
----
