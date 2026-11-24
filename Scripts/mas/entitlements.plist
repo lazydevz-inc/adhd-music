@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Mac App Store build. Tested on macOS 26.2 with a sandboxed copy: with these two keys the app hears
+	     other apps through Core Audio taps, lists apps playing sound or using the microphone, gets its
+	     global shortcut, Now Playing and the login item. The camera check needs
+	     com.apple.security.device.camera, which is left out on purpose: calls are noticed by the
+	     microphone. Scripts/package-mas.sh adds the application and team identifiers when it signs
+	     for the store. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.device.audio-input</key>
+	<true/>
+</dict>
+</plist>

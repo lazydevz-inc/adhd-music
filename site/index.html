@@ -1,0 +1,1823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ADHD Music · Plain, steady focus music for Mac</title>
+<meta name="description" content="A free menu bar app for Mac with plain, steady music for focused work. Built from 23 studies on ADHD and sound. It pauses by itself when a video plays.">
+<link rel="canonical" href="https://adhdmusic.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ADHD Music">
+<meta property="og:url" content="https://adhdmusic.app/">
+<meta property="og:title" content="ADHD Music · From scattered to steady.">
+<meta property="og:description" content="Plain, steady music for focused work. A free menu bar app for Mac, built for ADHD.">
+<meta property="og:image" content="https://adhdmusic.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ADHD Music: From scattered to steady. The player in the Mac menu bar.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+
+:root{
+  --ink:#14161A;--ink2:#3F4249;--mute:#5B5E66;--faint:#6B6F76;--soft:#8A8E95;
+  --hair:#E6E8EB;--hair2:#C9CDD2;--card:#F3F5F8;--glass:#B7BBBF;--grey-line:#A3A8AF;
+  --teal:#2B9FB2;--teal-g:#61ACBC;--teal-t:#1F7F90;--heart:#E0566B;
+  --gi:clamp(0px,calc(8.9vw - 80px),48px);
+  --cgap:128px;--ind:32px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:#FFFFFF;scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:#FFFFFF;color:#14161A;overflow-x:clip}
+.page{position:relative;overflow-x:clip;background:#FFFFFF;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.page:lang(ko){word-break:keep-all;line-break:strict}
+:where(.page) :where(h1,h2,h3,p,figure,ul,ol){margin:0}
+:where(.page) :where(ul,ol){padding:0;list-style:none}
+:where(.page) a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+:where(.page) button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none}
+.page a:focus-visible,.page button:focus-visible{outline:none}
+.page img{display:block;max-width:100%}
+.tnum{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{position:relative;z-index:1;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:calc(1312px + 2*var(--gi));margin:0 auto;padding-left:var(--gi);padding-right:var(--gi)}
+
+/* the line */
+#thread{position:absolute;left:0;top:0;width:100%;height:100px;z-index:0;pointer-events:none;overflow:visible}
+#dust{position:absolute;left:0;top:0;width:0;height:0;z-index:0;pointer-events:none}
+.track{fill:none;stroke:rgba(20,22,26,.07);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.line{fill:none;stroke:#61ACBC;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.endrun{fill:none;stroke:url(#endGrad);stroke-width:2.25;stroke-linecap:round;opacity:0;transition:opacity .7s ease}
+.endrun.on{opacity:1}
+.hero-line{fill:none;stroke:url(#heroGrad);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tip{opacity:0;transition:opacity .2s ease}
+.tip.on{opacity:1}
+.tip-halo{fill:#61ACBC;opacity:.16}
+.tip-dot{fill:#2B9FB2}
+/* the hero holds still while its line untangles, then the page moves on; the script sets both lengths from the measured window */
+.hero-track::after{content:"";display:block;height:var(--hero-pin,0px)}
+.hero-stick{position:sticky;top:var(--hero-top,0px);display:flow-root}
+.hero-svg{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+
+/* links and controls: no borders, no filled shapes; size, teal, icon and a hover response */
+.u{text-decoration:underline;text-decoration-color:transparent;text-decoration-thickness:2px;text-underline-offset:6px;transition:text-decoration-color .2s ease}
+.dl{display:inline-flex;align-items:center;gap:10px;height:40px;margin-left:-4px;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.2px;color:var(--teal-t)}
+.dl svg{flex:none;transition:transform .3s var(--ease)}
+.dl:hover .u{text-decoration-color:var(--teal-g)}
+.dl:focus-visible .u{text-decoration-color:var(--teal-t)}
+.dl:hover svg,.dl:focus-visible svg{transform:translateY(3px)}
+.q{display:inline-flex;align-items:center;gap:8px;font-size:15px;line-height:20px;color:var(--mute);transition:color .16s ease}
+.q svg{flex:none;transition:transform .25s var(--ease)}
+.q:hover,.q:focus-visible{color:var(--ink)}
+.q:hover .uq,.q:focus-visible .uq{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.q:hover svg,.q:focus-visible svg{transform:translateX(2px)}
+.inl{color:var(--ink);text-decoration:underline;text-decoration-color:rgba(20,22,26,.28);text-decoration-thickness:1px;text-underline-offset:3px;transition:text-decoration-color .16s ease}
+.inl:hover{text-decoration-color:var(--ink)}
+.inl:focus-visible{text-decoration-color:var(--teal-t);text-decoration-thickness:2px}
+.meta{margin-top:8px;font-size:15px;line-height:20px;color:var(--mute);text-wrap:balance}
+.nw{white-space:nowrap}
+
+/* top bar */
+.topbar{padding-top:calc(16px + var(--gi) + env(safe-area-inset-top,0px))}
+.topbar .inner{display:flex;justify-content:flex-end}
+.lang{display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:var(--mute)}
+.lang svg{flex:none;color:var(--mute)}
+.lang button{color:var(--mute);padding:4px 0;transition:color .16s ease}
+.lang button[aria-pressed="true"]{color:var(--ink);font-weight:600}
+.lang button:hover,.lang button:focus-visible{color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.lang .sep{color:var(--faint)}
+
+/* hero (C) */
+.hero{padding-bottom:80px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,416fr) minmax(0,480fr) minmax(0,416fr);margin-top:40px}
+.hero-text{grid-column:1;grid-row:1;display:flex;flex-direction:column;justify-content:space-between;gap:32px;min-width:0}
+.hero-icon{width:112px;height:112px;filter:drop-shadow(0 1px 1px rgba(16,24,40,.10)) drop-shadow(0 8px 20px rgba(16,24,40,.12))}
+.hero h1{margin-top:32px;font-size:clamp(48px,4.45vw,64px);line-height:1.125;font-weight:700;letter-spacing:-.025em}
+.hero .sub{margin-top:16px;font-size:clamp(20px,1.67vw,24px);line-height:1.34;letter-spacing:-.2px;color:var(--ink2)}
+.listen{margin-top:24px;margin-left:-2px;display:inline-flex;align-items:center;gap:10px;font-size:15px;line-height:20px;color:var(--ink);padding:4px 0}
+.listen-ic{position:relative;width:22px;height:22px;flex:none;transition:transform .25s var(--ease)}
+.listen-ic svg{position:absolute;inset:0;transition:opacity .2s ease}
+.listen-ic .ic-pause{opacity:0}
+.listen.is-playing .ic-play{opacity:0}
+.listen.is-playing .ic-pause{opacity:1}
+.listen-lbl{font-weight:600}
+.listen-time{color:var(--mute)}
+.listen:hover .listen-lbl,.listen:focus-visible .listen-lbl{text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:4px}
+.listen:hover .listen-ic,.listen:focus-visible .listen-ic{transform:scale(1.1)}
+.listen.is-playing,.listen.is-playing .listen-time{color:var(--teal-t)}
+.hero .q{margin-top:20px;margin-left:-2px}
+.hero-panel{grid-column:3;grid-row:1;justify-self:end;align-self:start;width:min(330px,100%);position:relative;z-index:2}
+.tilt{position:relative;will-change:transform}
+.hero-panel img{width:100%;height:auto;filter:drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 18px 44px rgba(16,24,40,.18))}
+.beat{position:absolute;left:50%;top:51.7%;width:46%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,rgba(97,172,188,0) 72%,rgba(97,172,188,.7) 88%,rgba(97,172,188,0) 100%);transform:translate(-50%,-50%);opacity:0;pointer-events:none}
+.reasons{margin-top:56px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px minmax(0,1fr) minmax(0,1fr);column-gap:32px}
+.reasons li:nth-child(3){grid-column:4}
+.reasons li:nth-child(4){grid-column:5}
+.reasons li{display:flex;flex-direction:column}
+.reasons svg{margin-left:-3px;color:var(--ink)}
+.r-t{margin-top:16px;font-size:17px;line-height:24px;font-weight:600}
+.r-d{margin-top:4px;font-size:15px;line-height:22px;color:var(--mute);text-wrap:pretty}
+
+/* chapters */
+.chap{padding-top:80px;padding-bottom:80px}
+.chap-grid{display:grid;grid-template-columns:minmax(0,480fr) var(--cgap) minmax(0,704fr);align-items:center}
+.chap-grid>.ct{grid-column:1;grid-row:1;min-width:0}
+.chap-grid>.cv{grid-column:3;grid-row:1;min-width:0}
+.chap-grid.flip{grid-template-columns:minmax(0,704fr) var(--cgap) minmax(0,480fr)}
+.chap-grid.flip>.ct{grid-column:3}
+.chap-grid.flip>.cv{grid-column:1}
+.label{position:relative;display:flex;align-items:center;gap:12px;font-size:14px;line-height:20px;font-weight:600;color:var(--mute)}
+.label .n{color:var(--ink);font-variant-numeric:tabular-nums}
+.label .bar{width:24px;height:1px;background:var(--hair2);flex:none}
+.node{position:absolute;top:50%;left:var(--ndx,-400px);width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#FFFFFF;box-shadow:inset 0 0 0 1.5px var(--hair2);transition:background-color .45s ease,box-shadow .45s ease;pointer-events:none}
+.node.lit{background:#2B9FB2;box-shadow:inset 0 0 0 1.5px #2B9FB2,0 0 0 5px rgba(97,172,188,.16)}
+.h{margin-top:16px;font-size:40px;line-height:48px;font-weight:700;letter-spacing:-1px;text-wrap:balance}
+.lead{margin-top:20px;font-size:19px;line-height:30px;color:var(--ink2);text-wrap:pretty}
+.lead+.lead{margin-top:16px}
+.par{will-change:transform}
+
+/* 01 what you hear */
+.numcard{border-radius:18px;background:#F3F5F8;padding:56px;display:flex;flex-direction:column;gap:48px}
+.nums{display:flex;gap:80px}
+.nums>div{display:flex;flex-direction:column;gap:12px}
+.big{font-size:96px;line-height:96px;font-weight:600;letter-spacing:-3px;color:var(--ink);font-variant-numeric:tabular-nums}
+.big-c{font-size:17px;line-height:24px;color:var(--ink2)}
+.gbar{display:flex;gap:4px;height:8px}
+.gbar i{display:block;border-radius:4px;transition:opacity .25s ease}
+.legend{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 32px;font-size:15px;line-height:24px;color:var(--ink2);text-wrap:balance}
+.legend>span{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.sw{width:10px;height:10px;border-radius:3px;flex:none}
+.pulse{display:flex;flex-direction:column;gap:16px}
+.pulse svg{display:block;width:100%;height:32px;overflow:hidden}
+.pulse path{fill:none;stroke:#A3A8AF;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .4s ease}
+.pulse.is-on path{stroke:#61ACBC}
+.pulse-c{font-size:15px;line-height:24px;color:var(--ink2);text-wrap:balance}
+.sounds{margin-top:32px}
+.sounds-t{font-size:14px;line-height:20px;font-weight:600;color:var(--mute)}
+.sounds ul{margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
+.sounds li{display:flex;align-items:center;gap:10px;font-size:15px;line-height:22px;color:var(--ink2)}
+.sounds svg{flex:none;color:var(--ink)}
+
+/* 02 the player (sticky) */
+.pin-track{position:relative;height:calc(var(--ch,640px) + var(--pin,min(150vh,1350px)))}
+.pin{position:sticky;top:max(24px,calc(50vh - var(--ch,640px)/2))}
+.pin .chap-grid{min-height:var(--ch,640px)}
+.stage{position:relative;width:calc(704px*var(--k,1));height:calc(612px*var(--k,1))}
+.stage-in{position:absolute;left:0;top:0;width:704px;height:612px;transform:scale(var(--k,1));transform-origin:0 0;border-radius:18px;background:#F3F5F8;overflow:hidden}
+.mbar{position:absolute;left:0;top:0;right:0;height:32px;background:rgba(255,255,255,.8);box-shadow:inset 0 -1px 0 rgba(20,22,26,.06);font-size:13px;line-height:16px;color:var(--ink)}
+.mb-item{position:absolute;left:494px;top:0;height:32px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:0 8px;font-variant-numeric:tabular-nums}
+.mb-item::after{content:"";position:absolute;left:0;right:0;top:4px;bottom:4px;border-radius:6px;background:rgba(20,22,26,.07);z-index:-1}
+.mb-right{position:absolute;left:552px;top:0;height:32px;display:flex;align-items:center;gap:14px;color:var(--ink2);white-space:nowrap}
+.stage-panel{position:absolute;left:324px;top:40px;width:340px}
+.stage-panel img,.m-panel img{width:100%;height:auto;filter:drop-shadow(0 1px 2px rgba(16,24,40,.08)) drop-shadow(0 14px 32px rgba(16,24,40,.15))}
+.ring{position:absolute;left:var(--rl,21.2%);top:var(--rt,11.6%);width:var(--rw,57.5%);height:var(--rh,11%);border-radius:12px;box-shadow:0 0 0 2px #61ACBC,0 0 0 7px rgba(97,172,188,.18);pointer-events:none;transition:left .6s var(--ease),top .6s var(--ease),width .6s var(--ease),height .6s var(--ease)}
+.leaders{position:absolute;left:0;top:0;width:704px;height:612px;pointer-events:none;z-index:2}
+.leaders line{stroke:#C9CDD2;stroke-width:1;transition:stroke .35s ease}
+.leaders circle{fill:#A3A8AF;transition:fill .35s ease}
+.leaders g.on line{stroke:#61ACBC;stroke-width:1.5}
+.leaders g.on circle{fill:#2B9FB2}
+/* callouts sit in the scaled stage but keep readable text: --q undoes most of the stage scale */
+.co{position:absolute;left:8px;right:436px;display:flex;flex-direction:column;align-items:flex-end;text-align:right;transform:translateY(calc(-11px * var(--q,1)));color:var(--mute);transition:color .35s ease}
+.co-t{font-size:16px;line-height:22px;font-weight:600}
+.co-d{font-size:14px;line-height:20px;color:var(--faint);transition:color .35s ease}
+.co .co-t{font-size:calc(16px * var(--q,1));line-height:calc(22px * var(--q,1));white-space:nowrap}
+.co .co-d{font-size:calc(14px * var(--q,1));line-height:calc(20px * var(--q,1))}
+.co.on{color:var(--ink)}
+.co.on .co-d{color:var(--ink2)}
+.co:hover,.co:focus-visible{color:var(--ink)}
+.co:hover .co-t,.co:focus-visible .co-t{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.mstage{display:none}
+
+/* 03 pauses */
+.prow{margin-top:32px;display:flex;flex-direction:column;gap:24px}
+.prow li{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:16px}
+.prow svg{margin-top:1px;color:var(--ink)}
+.p-t{font-size:17px;line-height:24px;font-weight:600}
+.p-d{font-size:15px;line-height:22px;color:var(--mute);text-wrap:pretty}
+.crop{position:relative;overflow:hidden;border-radius:16px;background:#F7F7F7;box-shadow:0 0 0 1px rgba(20,22,26,.05),0 1px 2px rgba(16,24,40,.06),0 20px 44px rgba(16,24,40,.12)}
+.crop img{position:absolute;max-width:none;height:auto}
+.crop-set{aspect-ratio:1242/840}
+.crop-set img{width:135.266%;left:-33.816%;top:-12.381%}
+.page:lang(ko) .crop-set img{top:-11.429%}
+.crop-chip{display:none}
+
+/* 04 focus counted */
+.hist img{width:100%;height:auto;filter:drop-shadow(0 0 1px rgba(20,22,26,.10)) drop-shadow(0 20px 44px rgba(16,24,40,.13))}
+.mbig{margin-top:40px;display:flex;flex-direction:column;gap:8px}
+.mbig .big{font-size:88px;line-height:88px}
+.mbig-c{display:flex;align-items:center;gap:8px;font-size:15px;line-height:20px;color:var(--mute)}
+.mbig-c svg{color:var(--ink)}
+.hlist{margin-top:32px;display:flex;flex-wrap:wrap;gap:8px 24px;font-size:15px;line-height:22px;color:var(--ink2)}
+.hlist li{display:inline-flex;align-items:center;gap:8px}
+.hlist li::before{content:"";width:5px;height:5px;border-radius:50%;background:#A3A8AF;flex:none}
+
+/* install */
+#install{scroll-margin-top:24px}
+.steps{margin-top:32px;display:flex;flex-direction:column;gap:12px}
+.steps li{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:baseline;font-size:19px;line-height:30px;color:var(--ink2);text-wrap:balance}
+.steps .sn{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.note{margin-top:24px;font-size:15px;line-height:24px;color:var(--mute);text-wrap:pretty}
+.dmg{position:relative;aspect-ratio:1088/735}
+.dmg img{position:absolute;max-width:none;width:117.647%;left:-8.824%;top:-8.844%;height:auto}
+
+/* closing */
+.cta .chap-grid{align-items:start}
+.cta-h{font-size:56px;line-height:64px;font-weight:700;letter-spacing:-1.8px;text-wrap:balance}
+.cta .lead{margin-top:24px}
+.cta-act{padding-left:112px;padding-top:12px;display:flex;flex-direction:column;align-items:flex-start}
+.go{display:inline-flex;align-items:center;gap:16px;height:48px;font-size:36px;line-height:48px;font-weight:600;letter-spacing:-.8px;color:var(--teal-t)}
+.go .ar{flex:none;overflow:visible}
+.go .ar line{transform-box:fill-box;transform-origin:0 50%;transition:transform .35s var(--ease)}
+.go .ar path{transition:transform .35s var(--ease)}
+.go:hover .ar line,.go:focus-visible .ar line{transform:scaleX(1.17)}
+.go:hover .ar path,.go:focus-visible .ar path{transform:translateX(6px)}
+.go:hover .u,.go.arrived .u{text-decoration-color:var(--teal-g)}
+.go:focus-visible .u{text-decoration-color:var(--teal-t)}
+.cta .meta{margin:12px 0 0 56px}
+.cta .q{margin:20px 0 0 56px}
+
+/* questions + footer */
+.faq{padding-top:40px;padding-bottom:96px}
+.faq-grid{display:grid;grid-template-columns:minmax(0,480fr) var(--cgap) minmax(0,704fr);border-top:1px solid var(--hair);padding-top:80px}
+.faq-h{font-size:28px;line-height:36px;font-weight:600;letter-spacing:-.4px}
+.qa{grid-column:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 32px}
+.qa h3{font-size:17px;line-height:24px;font-weight:600}
+.qa p{margin-top:8px;font-size:15px;line-height:22px;color:var(--mute);text-wrap:pretty}
+.foot{padding-bottom:calc(16px + var(--gi))}
+.foot-top{border-top:1px solid var(--hair);padding-top:32px;display:flex;align-items:center;justify-content:space-between;gap:20px 32px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand img{width:28px;height:28px;filter:drop-shadow(0 1px 2px rgba(16,32,72,.16))}
+.brand b{font-size:15px;line-height:20px;font-weight:600}
+.made{font-size:14px;line-height:20px;color:var(--mute)}
+.foot-links{display:flex;align-items:center;gap:28px;font-size:14px;line-height:20px}
+.foot-links .q{font-size:14px}
+.credits{margin-top:20px;max-width:880px;font-size:13px;line-height:20px;color:var(--faint);text-wrap:pretty}
+
+/* phone and narrow windows: one column on a rail */
+@media (max-width:1099px){
+  :root{--cgap:0px}
+  .inner{max-width:calc(720px + 2*var(--gi))}
+  .hero{padding-bottom:48px}
+  .hero-grid{display:block;margin-top:24px}
+  .hero-text{display:block}
+  .hero-icon{width:80px;height:80px}
+  .hero h1{margin-top:20px;font-size:40px;line-height:48px;letter-spacing:-1px}
+  .hero .sub{margin-top:10px;font-size:19px;line-height:28px}
+  .listen{margin-top:16px}
+  .hero-cta{margin-top:24px}
+  .dl{font-size:20px;height:36px}
+  .hero .q{margin-top:16px}
+  /* a window too short for the held hero gets a closer, smaller player (set by the script) */
+  .hero-panel{margin:var(--hero-panel-gap,64px) 0 0 auto;width:var(--hero-panel-w,clamp(232px,64vw,320px))}
+  .reasons{margin-top:48px;padding-left:var(--ind);display:flex;flex-direction:column;gap:24px}
+  .reasons li{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:16px}
+  .reasons svg{grid-row:1 / span 2;margin:0}
+  .r-t{margin-top:0}
+  .chap{padding-top:48px;padding-bottom:48px}
+  .chap-grid,.chap-grid.flip{display:block;padding-left:var(--ind)}
+  .ct{max-width:600px}
+  .cv{margin-top:32px;max-width:704px}
+  .h{font-size:30px;line-height:36px;letter-spacing:-.6px}
+  .lead{margin-top:16px;font-size:17px;line-height:27px}
+  .numcard{padding:32px 24px;gap:32px}
+  /* phone: three genres stay on one row, the count sits under each name */
+  .legend{display:grid;grid-template-columns:repeat(3,max-content);justify-content:start;gap:8px 24px;font-size:14px;line-height:20px}
+  .legend>span{align-items:flex-start}
+  .legend .sw{margin-top:5px}
+  .legend .lg-t{display:flex;flex-direction:column}
+  .legend .lg-c{color:var(--mute);font-variant-numeric:tabular-nums}
+  .nums{gap:36px}
+  .big{font-size:60px;line-height:60px;letter-spacing:-2px}
+  .big-c{font-size:15px;line-height:22px}
+  .sounds ul{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pin-track{height:auto}
+  .pin{position:static}
+  .pin .chap-grid{min-height:0}
+  .stage{display:none}
+  .mstage{display:block}
+  .m-panel{position:relative;width:min(248px,76%)}
+  .mco{margin-top:20px;display:flex;flex-direction:column;gap:2px}
+  .mco button{display:grid;grid-template-columns:16px minmax(0,1fr);column-gap:8px;align-items:start;width:100%;padding:8px 0;color:var(--mute);transition:color .3s ease}
+  .mco .mk{width:7px;height:7px;margin-top:8px;border-radius:50%;background:#C9CDD2;transition:background-color .3s ease}
+  .mco .co-t{font-size:16px;line-height:22px}
+  .mco .co-d{display:block;font-size:14px;line-height:20px;color:var(--faint)}
+  .mco button.on{color:var(--ink)}
+  .mco button.on .co-d{color:var(--ink2)}
+  .mco button.on .mk{background:#2B9FB2}
+  .mco button:hover .co-t,.mco button:focus-visible .co-t{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+  .crop-set{aspect-ratio:608/550}
+  .crop-set img{width:276.316%;left:-71.711%;top:-45.455%}
+  .page:lang(ko) .crop-set img{top:-40%}
+  /* same zoom as the cards above: 444 of the capture's 608 px column */
+  .crop-chip{display:block;margin-top:16px;width:73.03%;aspect-ratio:444/118;border-radius:12px}
+  .crop-chip img{width:378.378%;left:-98.198%;top:-688.136%}
+  .page:lang(ko) .crop-chip img{top:-662.712%}
+  .hist{position:relative;overflow:hidden;border-radius:14px;aspect-ratio:725/800;box-shadow:0 0 0 1px rgba(20,22,26,.05),0 16px 36px rgba(16,24,40,.12)}
+  .hist img{position:absolute;left:0;top:-12.5%;width:231.724%;max-width:none;filter:none}
+  .mbig{margin-top:32px}
+  .mbig .big{font-size:60px;line-height:60px}
+  .steps li{font-size:17px;line-height:27px;grid-template-columns:28px minmax(0,1fr)}
+  .cta-h{font-size:34px;line-height:40px;letter-spacing:-1px}
+  .cta .lead{margin-top:16px}
+  .cta-act{padding:0}
+  .go{font-size:24px;height:36px;line-height:36px;gap:12px;letter-spacing:-.4px}
+  .go .ar{width:28px;height:36px}
+  .cta .meta,.cta .q{margin-left:40px}
+  .faq{padding-top:24px;padding-bottom:56px}
+  .faq-grid{display:block;padding-top:48px}
+  .qa{margin-top:32px;grid-template-columns:minmax(0,1fr);gap:32px}
+  .foot-links{gap:24px;flex-wrap:wrap}
+}
+@media (max-width:420px){
+  .nums{flex-wrap:wrap;gap:24px 32px}
+  .big{font-size:clamp(44px,13.5vw,52px);line-height:1}
+  .nums .big-c{font-size:14px;line-height:20px;white-space:nowrap}
+}
+@media (max-width:359px){
+  .legend{display:flex;flex-wrap:wrap;gap:8px 24px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .page *,.page *::before,.page *::after{transition-duration:.01ms !important}
+  .hero-track::after{display:none}
+  .hero-stick{position:relative}
+}
+
+/* hero title: the name gives way to the line's promise as the string settles */
+.hero-id{display:flex;align-items:center;gap:20px}
+.wm{font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.2px;opacity:0}
+.hero h1.morph{position:relative}
+.m-name{display:inline-block}
+.m-slogan{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;white-space:nowrap;pointer-events:none}
+.m-slogan .ch{display:inline-block;opacity:0;white-space:pre}
+.m-slogan .mut{color:var(--mute)}
+.vh{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.r-c{margin-top:8px;font-size:12px;line-height:16px;font-weight:600;letter-spacing:.02em;color:var(--mute);font-variant-numeric:tabular-nums}
+/* research card */
+.rescard{gap:32px}
+.res-top{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap}
+.studies{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:16px 32px}
+.studies li{min-width:0}
+.studies li.more-hide{display:none}
+.studies.all li.more-hide{display:block}
+.studies a{display:flex;gap:12px;color:var(--ink2);text-decoration:none;font-size:13px;line-height:19px}
+.studies .y{flex:none;width:36px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.studies .st{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.studies a:hover .st,.studies a:focus-visible .st{text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+.res-more,.snd{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+.res-more{font-size:14px}
+.res-more:hover .u2,.res-more:focus-visible .u2,.snd:hover .u2,.snd:focus-visible .u2{text-decoration:underline;text-underline-offset:4px}
+/* tour video */
+.vid{position:relative;margin:0;border-radius:18px;overflow:hidden;background:#F3F5F8;box-shadow:0 1px 2px rgba(16,24,40,.06),0 16px 40px rgba(16,24,40,.10)}
+.vid video{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;cursor:pointer}
+.vid.v916{max-width:min(100%,420px)}
+.vid.v916 video{aspect-ratio:9/16}
+.snd{margin-top:28px;font-size:17px}
+@media (max-width:1099px){ .studies{grid-template-columns:1fr} .wm{font-size:18px} .hero-id{gap:16px} }
+
+/* 01 · why it works: the left column stays while the four rules step past */
+.why .chap-grid{align-items:start}
+.why .ct{align-self:stretch}
+.why-stick{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16vh)}
+.why .res-top{margin-top:40px}
+.rules{list-style:none;margin:0;padding:0}
+.rule{min-height:58vh;display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:24px;align-content:center;color:var(--soft);transition:color .45s var(--ease)}
+.rule:first-child{min-height:44vh;align-content:start;padding-top:4px}
+.rule-ic{color:var(--hair2);transition:color .45s var(--ease)}
+.rule-t{margin:0;font-size:clamp(32px,2.9vw,42px);line-height:1.15;font-weight:700;letter-spacing:-.02em}
+.rule-f{margin-top:12px;font-size:20px;line-height:30px}
+.rule-d{margin-top:6px;font-size:17px;line-height:27px}
+.rule-c{margin-top:14px;font-size:13px;line-height:18px;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.rule.on{color:var(--ink)}
+.rule.on .rule-f,.rule.on .rule-d{color:var(--ink2)}
+.rule.on .rule-c{color:var(--mute)}
+.rule.on .rule-ic{color:var(--teal)}
+.studies-wrap{margin-top:8px;padding:32px 0 0;border-top:1px solid var(--hair)}
+.studies-wrap .studies{margin-top:24px}
+/* 03 · video, with a quiet position bar */
+.vid-wrap{min-width:0}
+.vid-wrap.v916{max-width:min(100%,420px)}
+.vid-wrap.v916 .vid video{aspect-ratio:9/16}
+.scrub{position:relative;height:18px;margin-top:10px;cursor:pointer;touch-action:none;outline:none}
+.scrub::before,.scrub-fill{content:"";position:absolute;left:0;top:8px;height:2px;border-radius:2px;transition:height .15s var(--ease),top .15s var(--ease)}
+.scrub::before{right:0;background:var(--hair)}
+.scrub-fill{width:0;background:var(--teal)}
+.scrub:hover::before,.scrub:hover .scrub-fill,.scrub:focus-visible::before,.scrub:focus-visible .scrub-fill,.scrub.drag::before,.scrub.drag .scrub-fill{top:7px;height:4px}
+.scrub:focus-visible::before{box-shadow:0 0 0 2px var(--teal-g)}
+@media (max-width:1099px){
+  .reasons .r-c{grid-column:2;margin-top:6px}
+  .why .ct{align-self:auto}
+  .why-stick{position:static}
+  .rule,.rule:first-child{min-height:0;padding:20px 0;align-content:start;color:var(--ink);grid-template-columns:32px minmax(0,1fr);column-gap:16px}
+  .rule .rule-ic{color:var(--teal)}
+  .rule .rule-f,.rule .rule-d{color:var(--ink2)}
+  .rule .rule-c{color:var(--mute)}
+  .rule-t{font-size:26px}
+  .rule-f{font-size:18px;line-height:27px}
+  .rule-d{font-size:16px;line-height:25px}
+}
+@media (prefers-reduced-motion:reduce){ .rule,.rule-ic{transition:none} }
+
+/* 01 · the four rules take turns in one place while the section holds */
+.rules-track{position:relative;height:calc(4 * 46vh + 300px)}
+.rules-stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16vh + 44px)}
+.rules{display:grid}
+.rules .rule,.rules .rule:first-child{grid-area:1 / 1;min-height:0;padding:0;align-content:start;color:var(--ink);opacity:0;transform:translateY(18px);pointer-events:none;transition:opacity .5s var(--ease),transform .65s var(--ease)}
+.rules .rule.past{transform:translateY(-14px)}
+.rules .rule.on{opacity:1;transform:none;pointer-events:auto}
+.rules .rule .rule-ic{color:var(--teal)}
+.rules .rule .rule-f,.rules .rule .rule-d{color:var(--ink2)}
+.rules .rule .rule-c{color:var(--mute)}
+.rule-dots{display:flex;gap:8px;margin-top:40px;padding-left:72px}
+.rule-dots i{width:6px;height:6px;border-radius:3px;background:var(--hair2);transition:background .4s var(--ease),width .4s var(--ease)}
+.rule-dots i.on{width:20px;background:var(--teal)}
+@media (max-width:1099px){
+  .rules-track{height:auto}
+  .rules-stage{position:static}
+  .rules{display:block}
+  .rules .rule,.rules .rule:first-child{opacity:1;transform:none;pointer-events:auto;padding:20px 0}
+  .rule-dots{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .rules-track{height:auto}
+  .rules-stage{position:static}
+  .rules{display:block}
+  .rules .rule,.rules .rule:first-child{opacity:1;transform:none;pointer-events:auto;padding:24px 0;transition:none}
+  .rule-dots{display:none}
+}
+.studies[hidden]{display:none}
+
+/* 01 · both held blocks sit in the middle of the window, like the player chapter */
+.why-stick{top:0;min-height:100vh;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;justify-content:center}
+.rules-track{height:calc(100vh + 4 * 46vh)}
+.rules-stage{top:0;height:100vh;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;justify-content:center}
+@media (max-width:1099px){
+  .why-stick,.rules-stage{min-height:0;height:auto;padding-top:0;display:block}
+  .rules-track{height:auto}
+}
+@media (prefers-reduced-motion:reduce){
+  .why-stick,.rules-stage{min-height:0;height:auto;display:block}
+  .rules-track{height:auto}
+}
+
+/* the play ring breathes, as it does in the app while music plays */
+.pp{position:absolute;left:49.89%;top:51.64%;width:39.375%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.pp i{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(43,159,178,.4);animation:pp-breathe 2s cubic-bezier(.37,0,.63,1) infinite;transition:box-shadow .2s ease}
+@keyframes pp-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.tilt:has(#hs-play:hover) .pp i{box-shadow:inset 0 0 0 1.5px rgba(43,159,178,.72)}
+/* buttons drawn in the hero's player answer the mouse the way the app does */
+.hs{position:absolute;display:block;border-radius:999px;pointer-events:auto}
+.hs::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(20,22,26,.07);opacity:0;transform:scale(.86);transition:opacity .18s ease,transform .28s var(--ease)}
+.hs:hover::before{opacity:1;transform:scale(1)}
+.hs.c{width:var(--d);aspect-ratio:1;transform:translate(-50%,-50%)}
+.hs.play{cursor:pointer}
+.hs.play::before{background:rgba(255,255,255,.28)}
+.hs.play:active::before{transform:scale(.96)}
+.hs.card::before{background:rgba(20,22,26,.045)}
+@media (hover:none){.hs{display:none}}
+@media (prefers-reduced-motion:reduce){.pp i{animation:none}}
+
+/* tall windows */
+.rules-track{height:calc(100vh + 4 * min(46vh, 420px))}
+@media (min-width:1100px) and (min-height:1000px){
+  .hero-stick{display:flex;flex-direction:column;min-height:100vh;box-sizing:border-box}
+  .hero-stick>.hero{margin-block:auto}
+}
+@media (min-width:600px) and (max-width:1099px){
+  .crop-set,.hist{max-width:440px}
+  .crop-chip{max-width:322px}
+}
+@media (max-width:1099px){ .rules-track{height:auto} }
+@media (prefers-reduced-motion:reduce){ .rules-track{height:auto} }
+</style>
+
+<div class="page" id="page" lang="en">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9s1.2-6.5 3.6-9z"/></symbol>
+    <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2.5"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M8.5 6.5 3 12l5.5 5.5"/><path d="M15.5 6.5 21 12l-5.5 5.5"/></symbol>
+    <symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 10v4"/><path d="M8 6.5v11"/><path d="M12 3v18"/><path d="M16 6.5v11"/><path d="M20 10v4"/></symbol>
+    <symbol id="i-micoff" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M9 5.5V5a3 3 0 0 1 6 0v6"/><path d="M9 9v2a3 3 0 0 0 5 2.24"/><path d="M5 11a7 7 0 0 0 11.6 5.3"/><path d="M19 11a7 7 0 0 1-.4 2.3"/><path d="M12 18v3"/></symbol>
+    <symbol id="i-calm" viewBox="0 0 24 24"><path d="M3 9.5c1.5-1.4 3-1.4 4.5 0s3 1.4 4.5 0 3-1.4 4.5 0 3 1.4 4.5 0"/><path d="M3 14.5c1.5-1.4 3-1.4 4.5 0s3 1.4 4.5 0 3-1.4 4.5 0 3 1.4 4.5 0"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M16.5 3 20 6.5 16.5 10"/><path d="M3.5 11.5v-1a4 4 0 0 1 4-4H20"/><path d="M7.5 21 4 17.5 7.5 14"/><path d="M20.5 12.5v1a4 4 0 0 1-4 4H4"/></symbol>
+    <symbol id="i-head" viewBox="0 0 24 24"><path d="M3.5 13.5 A8.5 8.5 0 0 1 20.5 13.5 M8.25 16.5 V14.5 A1.25 1.25 0 0 1 10.75 14.5 V18.5 A1.25 1.25 0 0 0 13.25 18.5 V14.5 A1.25 1.25 0 0 1 15.75 14.5 V16.5"/><rect x="2.5" y="13" width="4" height="7" rx="2" fill="currentColor" stroke="none"/><rect x="17.5" y="13" width="4" height="7" rx="2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.8 12.6a9 9 0 0 1 12.4 0"/><path d="M9.1 16.1a4.2 4.2 0 0 1 5.8 0"/><circle cx="12" cy="19.2" r="1.2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2.5" y="6" width="13.5" height="12" rx="2.5"/><path d="M16 10.5 21.5 7v10L16 13.5"/></symbol>
+    <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18.3 6.6a7.6 7.6 0 0 1 0 10.8"/></symbol>
+    <symbol id="i-phones" viewBox="0 0 24 24"><path d="M4 15v-2.5a8 8 0 0 1 16 0V15"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.8"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.8"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M8 3.5 6.5 8"/><path d="M14 3.5 12.5 8"/><path d="M20 3.5 18.5 8"/><path d="M5 12.5 3.5 17"/><path d="M11 12.5 9.5 17"/><path d="M17 12.5 15.5 17"/><path d="M8 18.5 7.3 20.5"/><path d="M14 18.5 13.3 20.5"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2.5 11c2.3-3.2 4.7-3.2 7 0s4.7 3.2 7 0c1.6-2.2 3.2-2.8 5-1.8"/><path d="M4.5 17c1.8-1.6 3.7-1.6 5.5 0s3.7 1.6 5.5 0 3.7-1.6 5.5 0"/></symbol>
+    <symbol id="i-stream" viewBox="0 0 24 24"><path d="M3 7.5h4c3 0 3 4 6 4h8"/><path d="M3 15.5h7c3 0 3-3 6-3h5"/><path d="M6 20h9"/></symbol>
+    <symbol id="i-nb" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="6" cy="7" r="1.6"/><circle cx="14" cy="5.5" r="1.6"/><circle cx="19" cy="11" r="1.6"/><circle cx="9.5" cy="13" r="1.6"/><circle cx="5" cy="18.5" r="1.6"/><circle cx="15.5" cy="18" r="1.6"/></g></symbol>
+    <symbol id="i-np" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="5" cy="5" r="1.2"/><circle cx="11" cy="6.5" r="1.2"/><circle cx="17.5" cy="4.5" r="1.2"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="14" cy="12" r="1.2"/><circle cx="20" cy="10" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/><circle cx="11" cy="18" r="1.2"/><circle cx="17.5" cy="17.5" r="1.2"/><circle cx="14" cy="21" r="1.2"/></g></symbol>
+    <symbol id="i-nw" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="4" cy="4" r=".9"/><circle cx="9" cy="5" r=".9"/><circle cx="14" cy="3.5" r=".9"/><circle cx="19.5" cy="5" r=".9"/><circle cx="6.5" cy="9" r=".9"/><circle cx="12" cy="9.5" r=".9"/><circle cx="17" cy="8.5" r=".9"/><circle cx="3.5" cy="13" r=".9"/><circle cx="9" cy="13.5" r=".9"/><circle cx="14.5" cy="13" r=".9"/><circle cx="20" cy="12.5" r=".9"/><circle cx="6" cy="17.5" r=".9"/><circle cx="11.5" cy="18" r=".9"/><circle cx="17" cy="17" r=".9"/><circle cx="4" cy="21" r=".9"/><circle cx="9" cy="21.5" r=".9"/><circle cx="14.5" cy="21" r=".9"/><circle cx="20" cy="20.5" r=".9"/></g></symbol>
+  </defs>
+</svg>
+
+<!-- the thread below the hero; the hero draws its own part, so it can hold still -->
+<svg id="thread" aria-hidden="true" focusable="false">
+  <defs><linearGradient id="endGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0"><stop offset="0" stop-color="#61ACBC"/><stop offset="1" stop-color="#1F7F90"/></linearGradient><clipPath id="below-hero" clipPathUnits="userSpaceOnUse"><rect id="below-hero-r" x="-100" y="0" width="100000" height="1000000"/></clipPath></defs>
+  <g clip-path="url(#below-hero)">
+    <path id="track" class="track" d=""/>
+    <path id="line" class="line" d=""/>
+    <path id="endrun" class="endrun" d=""/>
+    <g id="tip" class="tip"><circle class="tip-halo" r="11"/><circle class="tip-dot" r="4"/></g>
+  </g>
+</svg>
+
+<main>
+<!-- the hero holds while its line untangles, then the page moves on -->
+<div class="hero-track" id="hero-track">
+<div class="hero-stick" id="hero-stick">
+<canvas id="dust" aria-hidden="true"></canvas>
+<svg class="hero-svg" id="hero-svg" aria-hidden="true" focusable="false">
+  <defs><linearGradient id="heroGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="100"><stop id="hg0" offset="0" stop-color="#A3A8AF"/><stop id="hg1" offset="1" stop-color="#A3A8AF"/></linearGradient></defs>
+  <g id="hero-g">
+    <path id="track-h" class="track" d=""/>
+    <path id="line-h" class="line" d=""/>
+    <path id="hero-line" class="hero-line" d="" pathLength="1"/>
+    <g id="tip-h" class="tip"><circle class="tip-halo" r="11"/><circle class="tip-dot" r="4"/></g>
+  </g>
+</svg>
+
+<header class="wrap topbar">
+  <div class="inner">
+    <div class="lang" role="group" aria-label="Language">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-globe"/></svg>
+      <button type="button" id="lang-en" data-lang-btn="en" aria-pressed="true" lang="en">EN</button>
+      <span class="sep" aria-hidden="true">·</span>
+      <button type="button" id="lang-ko" data-lang-btn="ko" aria-pressed="false" lang="ko" aria-label="한국어">KO</button>
+    </div>
+  </div>
+</header>
+
+<section class="wrap hero" id="top">
+  <div class="inner">
+    <div class="hero-grid">
+      <div class="hero-text" id="hero-text">
+        <div class="hero-head">
+          <div class="hero-id"><img class="hero-icon" src="assets/icon.png" width="512" height="512" alt="ADHD Music app icon: a black headset with a teal sound wave on white glass" data-ia="altIcon" decoding="async"><span class="wm" id="wm" aria-hidden="true">ADHD Music</span></div>
+          <h1 class="morph" id="hero-h1"><span class="m-name">ADHD Music</span><span class="vh" data-i="h1Hidden">: From scattered to steady.</span><span class="m-slogan" id="slogan" aria-hidden="true"></span></h1>
+          <p class="sub" data-i="heroSub">Plain, steady music for focused work.<br>It lives in your Mac’s menu bar.</p>
+          <button type="button" class="listen" id="listen">
+            <span class="listen-ic" aria-hidden="true">
+              <svg class="ic-play" viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.6v12.8a1 1 0 0 0 1.5.86l10.2-6.4a1 1 0 0 0 0-1.72L9.5 4.74A1 1 0 0 0 8 5.6z" fill="currentColor"/></svg>
+              <svg class="ic-pause" viewBox="0 0 24 24" width="22" height="22"><rect x="6.5" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/></svg>
+            </span>
+            <span class="listen-lbl" id="listen-label">Listen</span>
+            <span class="listen-time tnum"><span id="listen-song">Plain Loop</span> · <span id="listen-time">0:25</span></span>
+          </button>
+        </div>
+        <div class="hero-cta">
+          <a class="dl" id="dl-hero" href="#install" data-href="/download">
+            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-dl"/></svg>
+            <span class="u" data-i="dl">Download for Mac</span>
+          </a>
+          <p class="meta" data-i="meta1"><span class="nw">Free&nbsp;·</span> <span class="nw">460 MB&nbsp;·</span> <span class="nw">macOS 26 or later&nbsp;·</span> <span class="nw">Apple silicon</span></p>
+          <a class="q" id="gh-hero" href="#" data-href="https://github.com/lazydevz-inc/adhd-music">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-code"/></svg>
+            <span class="uq" data-i="gh">Open source on GitHub</span>
+          </a>
+        </div>
+      </div>
+      <figure class="hero-panel" id="hero-panel">
+        <div class="tilt" id="tilt">
+          <img id="hero-img" src="assets/main-en.png" data-ko="assets/main-ko.png" width="640" height="1002" fetchpriority="high" alt="The ADHD Music player, open from the menu bar: today’s focus time, No limit, the task you are on, play controls, Mix, the current song and today’s bar" data-ia="altPanel" decoding="async">
+          <span class="beat" id="beat" aria-hidden="true"></span>
+          <span class="pp" aria-hidden="true"><i></i></span>
+          <span class="hs-layer" aria-hidden="true"><span class="hs c" style="left:19.4%;top:51.7%;--d:14%"></span><span class="hs c" style="left:80.6%;top:51.7%;--d:14%"></span><span class="hs c" style="left:24.2%;top:70.6%;--d:10%"></span><span class="hs c" style="left:75.8%;top:70.6%;--d:10%"></span><span class="hs c" style="left:75.5%;top:79.4%;--d:11%"></span><span class="hs c" style="left:92.5%;top:5.6%;--d:10%"></span><span class="hs card" style="left:3.6%;top:3.0%;width:33.2%;height:5.2%;border-radius:10px"></span><span class="hs card" style="left:36.4%;top:24.6%;width:27.2%;height:4.2%;border-radius:999px"></span><span class="hs card" style="left:25.4%;top:30.5%;width:49.5%;height:5.4%;border-radius:12px"></span><span class="hs card" style="left:40.5%;top:68.3%;width:20.5%;height:4.6%;border-radius:10px"></span><span class="hs card" style="left:15%;top:74.8%;width:45%;height:9.2%;border-radius:12px"></span><span class="hs card" style="left:5.2%;top:85.8%;width:89.7%;height:10.8%;border-radius:16px"></span><span class="hs c play" id="hs-play" style="left:50%;top:51.7%;--d:33%"></span></span>
+        </div>
+      </figure>
+    </div>
+    <ul class="reasons" id="reasons">
+      <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-bars"/></svg><span class="r-t" data-i="r1t">A pulse on the beat</span><span class="r-d" data-i="r1d">A faint pulse made for ADHD focus. Attention drifts less.</span><span class="r-c">Woods 2024</span></li>
+      <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-micoff"/></svg><span class="r-t" data-i="r2t">No voices</span><span class="r-d" data-i="r2d">Lyrics pull your mind into words. There are none here.</span><span class="r-c">Vasilev 2018 · Souza 2023</span></li>
+      <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-calm"/></svg><span class="r-t" data-i="r3t">No surprises</span><span class="r-d" data-i="r3d">ADHD brains react more to sudden sounds. Nothing jumps out here.</span><span class="r-c">Levy 2025 · Hughes 2014</span></li>
+      <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-loop"/></svg><span class="r-t" data-i="r4t">Just a loop</span><span class="r-d" data-i="r4d">One pattern on repeat, no tune to follow. It stays in the background.</span><span class="r-c">Bell 2012</span></li>
+    </ul>
+  </div>
+</section>
+</div>
+</div>
+
+<!-- 01 -->
+<section class="wrap chap why" id="hear" data-lane>
+  <div class="inner chap-grid">
+    <div class="ct">
+      <div class="why-stick">
+        <p class="label"><span class="node" aria-hidden="true"></span><span class="n">01</span><span class="bar" aria-hidden="true"></span><span data-i="c1l">Why it works</span></p>
+        <h2 class="h" data-i="c1h">Built for ADHD from the start.</h2>
+        <p class="lead" data-i="c1p1">We read 23 studies on ADHD and sound. Four rules came out of them, and every song follows all four.</p>
+        <div class="res-top"><span class="big tnum" id="res-n">23</span><span class="big-c" data-i="resC">studies on ADHD and sound</span></div>
+      </div>
+    </div>
+    <div class="cv">
+      <div class="rules-track" id="rules-track"><div class="rules-stage" id="rules-stage">
+      <ol class="rules" id="rules">
+        <li class="rule on" data-rule="0"><span class="rule-ic"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-micoff"/></svg></span><div><h3 class="rule-t" data-i="ru1t">No voices</h3><p class="rule-f" data-i="ru1f">Lyrics get in the way of reading and remembering.</p><p class="rule-d" data-i="ru1d">So every song is instrumental: no lyrics, no spoken words.</p><p class="rule-c">Vasilev 2018 · Souza 2023</p></div></li>
+        <li class="rule" data-rule="1"><span class="rule-ic"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-calm"/></svg></span><div><h3 class="rule-t" data-i="ru2t">No surprises</h3><p class="rule-f" data-i="ru2f">ADHD brains react more to sudden sounds.</p><p class="rule-d" data-i="ru2d">So nothing jumps out: no drops, no hits, no alarms.</p><p class="rule-c">Levy 2025 · Hughes 2014</p></div></li>
+        <li class="rule" data-rule="2"><span class="rule-ic"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-loop"/></svg></span><div><h3 class="rule-t" data-i="ru3t">Just a loop</h3><p class="rule-f" data-i="ru3f">A familiar loop distracts less than a tune you follow.</p><p class="rule-d" data-i="ru3d">So each song repeats one pattern, with no melody to chase.</p><p class="rule-c">Bell 2012</p></div></li>
+        <li class="rule" data-rule="3"><span class="rule-ic"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-bars"/></svg></span><div><h3 class="rule-t" data-i="ru4t">A pulse on the beat</h3><p class="rule-f" data-i="ru4f">A steady pulse helped listeners whose attention drifts easily.</p><p class="rule-d" data-i="ru4d">So every song carries a faint pulse locked to its beat.</p><p class="rule-c">Woods 2024</p></div></li>
+      </ol>
+        <div class="rule-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+      </div></div>
+      <div class="studies-wrap">
+        <button type="button" class="res-more" id="res-more" aria-expanded="false" aria-controls="studies"><span class="u2" id="res-more-l">See all 23 studies</span></button>
+        <ol class="studies" id="studies" hidden><li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11283987/" target="_blank" rel="noopener" title="Systematic Review and Meta-Analysis: Do White Noise and Pink Noise Help With Attention in Attention-Deficit/Hyperactivity Disorder?"><span class="y">2024</span><span class="st">Systematic Review and Meta-Analysis: Do White Noise and Pink Noise Help With Attention in Attention-Deficit/Hyperactivity Disorder?</span></a></li><li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11499863/" target="_blank" rel="noopener" title="Rapid modulation in music supports attention in listeners with attentional difficulties"><span class="y">2024</span><span class="st">Rapid modulation in music supports attention in listeners with attentional difficulties</span></a></li><li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11585357/" target="_blank" rel="noopener" title="Sensory white noise in clinical ADHD: Who benefits from noise, and who performs worse?"><span class="y">2024</span><span class="st">Sensory white noise in clinical ADHD: Who benefits from noise, and who performs worse?</span></a></li><li><a href="https://doi.org/10.1080/20445911.2025.2563538" target="_blank" rel="noopener" title="Differential impacts of addition and omission deviants on the working memory performance of adults with and without self-reported ADHD"><span class="y">2025</span><span class="st">Differential impacts of addition and omission deviants on the working memory performance of adults with and without self-reported ADHD</span></a></li><li><a href="https://pubmed.ncbi.nlm.nih.gov/40731084/" target="_blank" rel="noopener" title="Pink Noise and a Pure Tone Both Reduce 1/f Neural Noise in Adults With Elevated ADHD Traits: A Critical Appraisal of the Moderate Brain Arousal Model"><span class="y">2026</span><span class="st">Pink Noise and a Pure Tone Both Reduce 1/f Neural Noise in Adults With Elevated ADHD Traits: A Critical Appraisal of the Moderate Brain Arousal Model</span></a></li><li><a href="https://doi.org/10.1080/08856257.2025.2554885" target="_blank" rel="noopener" title="Acoustic stimulation as a means to improve attention in children with attention-deficit/hyperactivity disorder (ADHD)"><span class="y">2025</span><span class="st">Acoustic stimulation as a means to improve attention in children with attention-deficit/hyperactivity disorder (ADHD)</span></a></li><li><a href="https://www.mdpi.com/2036-7503/18/3/81" target="_blank" rel="noopener" title="Effects of White Noise on Academic Skills in Children with ADHD and Specific Learning Disorders: New Perspectives for Personalised Rehabilitation and Educational Intervention"><span class="y">2026</span><span class="st">Effects of White Noise on Academic Skills in Children with ADHD and Specific Learning Disorders: New Perspectives for Personalised Rehabilitation and Educational Intervention</span></a></li><li><a href="https://www.mdpi.com/1660-4601/19/12/7283" target="_blank" rel="noopener" title="Listening to White Noise Improved Verbal Working Memory in Children with ADHD: A Pilot Study"><span class="y">2022</span><span class="st">Listening to White Noise Improved Verbal Working Memory in Children with ADHD: A Pilot Study</span></a></li><li><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2016.01331/full" target="_blank" rel="noopener" title="Comparing Auditory Noise Treatment with Stimulant Medication on Cognitive Task Performance in Children with ADHD: Results from a Pilot Study"><span class="y">2016</span><span class="st">Comparing Auditory Noise Treatment with Stimulant Medication on Cognitive Task Performance in Children with ADHD: Results from a Pilot Study</span></a></li><li><a href="https://www.mdpi.com/2076-328x/15/1/65" target="_blank" rel="noopener" title="Exploring the Intersection of ADHD and Music: A Systematic Review"><span class="y">2025</span><span class="st">Exploring the Intersection of ADHD and Music: A Systematic Review</span></a></li><li><a href="https://www.i-jmr.org/2024/1/e53869/" target="_blank" rel="noopener" title="Effects of Background Music on Attentional Networks of Children With and Without ADHD: Case Control Experimental Study"><span class="y">2024</span><span class="st">Effects of Background Music on Attentional Networks of Children With and Without ADHD: Case Control Experimental Study</span></a></li><li><a href="https://journals.sagepub.com/doi/10.1177/002221949602900302" target="_blank" rel="noopener" title="The Effects of Auditory Stimulation on the Arithmetic Performance of Children with ADHD and Nondisabled Children"><span class="y">1996</span><span class="st">The Effects of Auditory Stimulation on the Arithmetic Performance of Children with ADHD and Nondisabled Children</span></a></li><li><a href="https://pubmed.ncbi.nlm.nih.gov/21695447/" target="_blank" rel="noopener" title="Music and video as distractors for boys with ADHD in the classroom: comparison with controls, individual differences, and medication effects"><span class="y">2011</span><span class="st">Music and video as distractors for boys with ADHD in the classroom: comparison with controls, individual differences, and medication effects</span></a></li><li><a href="https://www.sciencedirect.com/science/article/pii/S0165178120302249" target="_blank" rel="noopener" title="Contrasting effects of music on reading comprehension in preadolescents with and without ADHD"><span class="y">2020</span><span class="st">Contrasting effects of music on reading comprehension in preadolescents with and without ADHD</span></a></li><li><a href="https://journals.sagepub.com/doi/10.1177/03057356211062940" target="_blank" rel="noopener" title="The effect of Chinese pop background music on Chinese poetry reading comprehension"><span class="y">2022</span><span class="st">The effect of Chinese pop background music on Chinese poetry reading comprehension</span></a></li><li><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.01104/full" target="_blank" rel="noopener" title="Listening to Mozart Improves Current Mood in Adult ADHD: A Randomized Controlled Pilot Study"><span class="y">2019</span><span class="st">Listening to Mozart Improves Current Mood in Adult ADHD: A Randomized Controlled Pilot Study</span></a></li><li><a href="https://www.sciencedirect.com/science/article/pii/S0882596308003321" target="_blank" rel="noopener" title="Pilot feasibility study of binaural auditory beats for reducing symptoms of inattention in children and adolescents with ADHD"><span class="y">2010</span><span class="st">Pilot feasibility study of binaural auditory beats for reducing symptoms of inattention in children and adolescents with ADHD</span></a></li><li><a href="https://pubmed.ncbi.nlm.nih.gov/40938421/" target="_blank" rel="noopener" title="Sustained attention in attention-deficit subjects and the impact of binaural beat stimulation evaluated by behavior and EEG"><span class="y">2025</span><span class="st">Sustained attention in attention-deficit subjects and the impact of binaural beat stimulation evaluated by behavior and EEG</span></a></li><li><a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0286023" target="_blank" rel="noopener" title="Binaural beats to entrain the brain? A systematic review of the effects of binaural beat stimulation on brain oscillatory activity"><span class="y">2023</span><span class="st">Binaural beats to entrain the brain? A systematic review of the effects of binaural beat stimulation on brain oscillatory activity</span></a></li><li><a href="https://www.nature.com/articles/s41598-025-88517-z" target="_blank" rel="noopener" title="A parametric investigation of binaural beats for brain entrainment and enhancing sustained attention"><span class="y">2025</span><span class="st">A parametric investigation of binaural beats for brain entrainment and enhancing sustained attention</span></a></li><li><a href="https://www.scielo.br/j/trends/a/jkWS6zjbhD7hPtKH8tLRmTH/?lang=en" target="_blank" rel="noopener" title="Outcomes of music therapy on children and adolescents with ADHD: a systematic review and meta-analysis"><span class="y">2025</span><span class="st">Outcomes of music therapy on children and adolescents with ADHD: a systematic review and meta-analysis</span></a></li><li><a href="https://www.frontiersin.org/journals/public-health/articles/10.3389/fpubh.2026.1808386/full" target="_blank" rel="noopener" title="Influence of rhythmic music game intervention on executive function and sensorimotor ability of children with ADHD"><span class="y">2026</span><span class="st">Influence of rhythmic music game intervention on executive function and sensorimotor ability of children with ADHD</span></a></li><li><a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1508181/full" target="_blank" rel="noopener" title="Listening habits and subjective effects of background music in young adults with and without ADHD"><span class="y">2025</span><span class="st">Listening habits and subjective effects of background music in young adults with and without ADHD</span></a></li></ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 · what you hear -->
+<section class="wrap chap" id="sound" data-lane>
+  <div class="inner chap-grid flip">
+    <div class="ct">
+      <p class="label"><span class="node" aria-hidden="true"></span><span class="n">02</span><span class="bar" aria-hidden="true"></span><span data-i="sdl">What you hear</span></p>
+      <h2 class="h" data-i="sdh">Music that stays in the background.</h2>
+      <p class="lead" data-i="sdp1">27 songs in Lo-fi, Grooves and Electronic, each a seamless 30‑minute stretch.</p>
+      <p class="lead" data-i="sdp2">Shuffle keeps songs you just heard from coming back, songs you skip early come up less, and you choose how strong the pulse is.</p>
+      <div class="sounds">
+        <p class="sounds-t" data-i="sndT">Add a sound underneath, if you like</p>
+        <ul>
+          <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-rain"/></svg><span data-i="snd1">Rain</span></li>
+          <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-wave"/></svg><span data-i="snd2">Waves</span></li>
+          <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-stream"/></svg><span data-i="snd3">Stream</span></li>
+          <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-nb"/></svg><span data-i="snd4">Brown noise</span></li>
+          <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-np"/></svg><span data-i="snd5">Pink noise</span></li>
+          <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-nw"/></svg><span data-i="snd6">White noise</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="cv">
+      <div class="par" data-par>
+        <div class="numcard">
+          <div class="nums">
+            <div><span class="big">27</span><span class="big-c" data-i="n1c">songs, no vocals</span></div>
+            <div><span class="big">30:00</span><span class="big-c" data-i="n2c">each, without a seam</span></div>
+          </div>
+          <div class="genre">
+            <div class="gbar" aria-hidden="true"><i style="flex:12;background:#6B6E74"></i><i style="flex:8;background:#9A9EA4"></i><i style="flex:7;background:#C4C7CC"></i></div>
+            <div class="legend">
+              <span><b class="sw" style="background:#6B6E74" aria-hidden="true"></b><span class="lg-t">Lo-fi <span class="lg-c" data-i="lg1">12</span></span></span>
+              <span><b class="sw" style="background:#9A9EA4" aria-hidden="true"></b><span class="lg-t">Grooves <span class="lg-c" data-i="lg2">8</span></span></span>
+              <span><b class="sw" style="background:#C4C7CC" aria-hidden="true"></b><span class="lg-t">Electronic <span class="lg-c" data-i="lg3">7</span></span></span>
+            </div>
+          </div>
+          <div class="pulse" id="pulse">
+            <svg viewBox="0 0 592 32" preserveAspectRatio="xMinYMid slice" aria-hidden="true"><g id="pulse-g"><path id="pulse-path" d=""/></g></svg>
+            <span class="pulse-c" data-i="pulseC">A steady pulse on the beat, in every song.</span>
+          </div>
+        </div>
+      </div>
+    
+  </div>
+</section>
+
+<!-- 03 · the tour video -->
+<section class="wrap chap" id="watch" data-lane>
+  <div class="inner chap-grid">
+    <div class="ct">
+      <p class="label"><span class="node" aria-hidden="true"></span><span class="n">03</span><span class="bar" aria-hidden="true"></span><span data-i="cwl">See it</span></p>
+      <h2 class="h" data-i="cwh">See it in 45 seconds.</h2>
+      <button type="button" class="snd" id="vid-sound" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span class="u2" id="vid-sound-l">Sound on</span></button>
+    </div>
+    <div class="cv">
+      <div class="vid-wrap" id="vid-wrap">
+        <figure class="vid" id="vid-fig">
+          <video id="tour" muted playsinline loop preload="metadata" poster="assets/video/poster-b-en.jpg" aria-label="A 45-second tour of ADHD Music"></video>
+        </figure>
+        <div class="scrub" id="scrub" role="slider" tabindex="0" aria-label="Video position" aria-valuemin="0" aria-valuemax="45" aria-valuenow="0" aria-valuetext="0:00"><span class="scrub-fill" id="scrub-fill"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 (sticky) -->
+<section class="wrap chap" id="player" data-lane data-pin>
+  <div class="pin-track" id="pin-track">
+    <div class="pin">
+      <div class="inner chap-grid flip">
+        <div class="ct" id="player-text">
+          <p class="label"><span class="node" aria-hidden="true"></span><span class="n">04</span><span class="bar" aria-hidden="true"></span><span data-i="c2l">The player</span></p>
+          <h2 class="h" data-i="c2h">It lives in your menu bar.</h2>
+          <p class="lead" data-i="c2p1">Click the time in your menu bar and the player opens. Click again and it tucks away.</p>
+          <p class="lead" data-i="c2p2">The big number is today’s focus time. It only counts while music plays.</p>
+        </div>
+        <div class="cv" id="stage-col">
+          <div class="stage" id="stage">
+            <div class="stage-in">
+              <div class="mbar" aria-hidden="true">
+                <span class="mb-item"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-head"/></svg><span class="js-ftime">2:14:02</span></span>
+                <span class="mb-right"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-wifi"/></svg><span data-i="mbDate">Tue&nbsp;&nbsp;9:45 PM</span></span>
+              </div>
+              <svg class="leaders" viewBox="0 0 704 612" aria-hidden="true" style="z-index:2">
+                <g data-lead="0"><line x1="280" y1="131" x2="396" y2="131"/><circle cx="396" cy="131" r="3"/></g>
+                <g data-lead="1"><line x1="280" y1="181" x2="445" y2="181"/><circle cx="445" cy="181" r="3"/></g>
+                <g data-lead="2"><line x1="280" y1="416" x2="393" y2="416"/><circle cx="393" cy="416" r="3"/></g>
+                <g data-lead="3"><line x1="280" y1="526" x2="340" y2="526"/><circle cx="340" cy="526" r="3"/></g>
+              </svg>
+              <button type="button" class="co" id="co-1" data-step="0" style="top:131px"><span class="co-t" data-i="co1">Today’s focus time</span></button>
+              <button type="button" class="co" id="co-2" data-step="1" style="top:181px"><span class="co-t" data-i="co2">Timer, pomodoro or no limit</span></button>
+              <button type="button" class="co" id="co-3" data-step="2" style="top:416px"><span class="co-t" data-i="co3">Mix, or one genre</span><span class="co-d" data-i="co3d">Lo-fi, Grooves or Electronic.</span></button>
+              <button type="button" class="co" id="co-4" data-step="3" style="top:526px"><span class="co-t" data-i="co4">Today at a glance</span><span class="co-d" data-i="co4d">One click to History.</span></button>
+              <figure class="stage-panel">
+                <img src="assets/main-notask-en.png" data-ko="assets/main-notask-ko.png" width="640" height="1002" loading="lazy" alt="The player panel under the menu bar time" data-ia="altStage" decoding="async">
+                <span class="pp" aria-hidden="true"><i></i></span>
+                <span class="ring" data-ring aria-hidden="true"></span>
+              </figure>
+            </div>
+          </div>
+          <div class="mstage">
+            <figure class="m-panel">
+              <img src="assets/main-notask-en.png" data-ko="assets/main-notask-ko.png" width="640" height="1002" loading="lazy" alt="The player panel under the menu bar time" data-ia="altStage" decoding="async">
+              <span class="pp" aria-hidden="true"><i></i></span>
+              <span class="ring" data-ring aria-hidden="true"></span>
+            </figure>
+            <ol class="mco" id="mco">
+              <li><button type="button" id="mco-1" data-step="0"><span class="mk" aria-hidden="true"></span><span><span class="co-t" data-i="co1">Today’s focus time</span></span></button></li>
+              <li><button type="button" id="mco-2" data-step="1"><span class="mk" aria-hidden="true"></span><span><span class="co-t" data-i="co2">Timer, pomodoro or no limit</span></span></button></li>
+              <li><button type="button" id="mco-3" data-step="2"><span class="mk" aria-hidden="true"></span><span><span class="co-t" data-i="co3">Mix, or one genre</span><span class="co-d" data-i="co3d">Lo-fi, Grooves or Electronic.</span></span></button></li>
+              <li><button type="button" id="mco-4" data-step="3"><span class="mk" aria-hidden="true"></span><span><span class="co-t" data-i="co4">Today at a glance</span><span class="co-d" data-i="co4d">One click to History.</span></span></button></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="wrap chap" id="pauses" data-lane>
+  <div class="inner chap-grid">
+    <div class="ct">
+      <p class="label"><span class="node" aria-hidden="true"></span><span class="n">05</span><span class="bar" aria-hidden="true"></span><span data-i="c3l">Pauses by itself</span></p>
+      <h2 class="h" data-i="c3h">It steps aside when life cuts in.</h2>
+      <p class="lead" data-i="c3p">The music pauses, then plays again on its own. That time stays out of History.</p>
+      <ul class="prow">
+        <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-lock"/></svg><div><p class="p-t" data-i="p1t">When you step away</p><p class="p-d" data-i="p1d">Screen lock or sleep. Back on when you return.</p></div></li>
+        <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-video"/></svg><div><p class="p-t" data-i="p2t">During calls</p><p class="p-d" data-i="p2d">When the mic or camera turns on. Back on when the call ends.</p></div></li>
+        <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-speaker"/></svg><div><p class="p-t" data-i="p3t">When another app plays sound</p><p class="p-d" data-i="p3d">Like a YouTube video. Back on when it is quiet.</p></div></li>
+        <li><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-phones"/></svg><div><p class="p-t" data-i="p4t">When headphones come off</p><p class="p-d" data-i="p4d">So it never spills out of the speakers. Back on when they reconnect.</p></div></li>
+      </ul>
+    </div>
+    <div class="cv">
+      <div class="par" data-par>
+        <div class="crop crop-set">
+          <img src="assets/settings-pause-en.png" data-ko="assets/settings-pause-ko.png" width="1680" height="1120" loading="lazy" alt="Settings, Pauses by itself: four switches, all on, for stepping away, calls, other sound and headphones. Below, the player tag reads Paused · Chrome is playing" data-ia="altSet" data-ia-m="altSetM" decoding="async">
+        </div>
+        <div class="crop crop-chip">
+          <img src="assets/settings-pause-en.png" data-ko="assets/settings-pause-ko.png" width="1680" height="1120" loading="lazy" alt="On the player it reads Paused · Chrome is playing" data-ia="altChip" decoding="async">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="wrap chap" id="focus" data-lane>
+  <div class="inner chap-grid flip">
+    <div class="ct">
+      <p class="label"><span class="node" aria-hidden="true"></span><span class="n">06</span><span class="bar" aria-hidden="true"></span><span data-i="c4l">Your focus, counted</span></p>
+      <h2 class="h" data-i="c4h">See where your focus went.</h2>
+      <p class="lead" data-i="c4p">Today’s focus time sits in your menu bar. History shows each stretch, the task you named and the music you heard.</p>
+      <div class="mbig">
+        <span class="big js-ftime">2:14:02</span>
+        <span class="mbig-c"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-head"/></svg><span data-i="mbigC">Today, in your menu bar</span></span>
+      </div>
+      <ul class="hlist">
+        <li data-i="hl1">Week strip</li><li data-i="hl2">Day timeline</li><li data-i="hl3">Time per task</li><li data-i="hl4">Music you heard</li><li data-i="hl5">Month view</li>
+      </ul>
+    </div>
+    <div class="cv">
+      <div class="par" data-par>
+        <div class="hist">
+          <img src="assets/history-en.png" data-ko="assets/history-ko.png" width="1680" height="1120" loading="lazy" alt="History: this week as a strip of days, today as a timeline with three focus stretches, time per task and the music you heard" data-ia="altHist" decoding="async">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- install -->
+<section class="wrap chap" id="install" data-lane>
+  <div class="inner chap-grid">
+    <div class="ct">
+      <p class="label"><span class="node" aria-hidden="true"></span><span class="n">07</span><span class="bar" aria-hidden="true"></span><span data-i="inL">Install</span></p>
+      <h2 class="h" data-i="inH">Three steps.</h2>
+      <ol class="steps">
+        <li><span class="sn">1</span><span data-i="s1">Open the .dmg.</span></li>
+        <li><span class="sn">2</span><span data-i="s2">Drag ADHD Music into Applications.</span></li>
+        <li><span class="sn">3</span><span data-i="s3">Open it. It lives in your menu bar.</span></li>
+      </ol>
+      <p class="note" data-i="inNote">macOS asks once to let it hear other apps’ sound. That is how it pauses for a YouTube video. Nothing is recorded.</p>
+      <p class="meta" data-i="inMeta">A notarized .dmg, about 460 MB.</p>
+    </div>
+    <div class="cv">
+      <div class="par" data-par>
+        <div class="dmg">
+          <img src="assets/dmg-window.png" width="1280" height="926" loading="lazy" alt="The disk image window: the ADHD Music app, a wave-shaped arrow and the Applications folder, with the line Drag ADHD Music into Applications" data-ia="altDmg" decoding="async">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- closing -->
+<section class="wrap chap cta" id="get" data-lane>
+  <div class="inner chap-grid">
+    <div class="ct">
+      <h2 class="cta-h" data-i="ctaH">Your steady line<br>starts here.</h2>
+      <p class="lead" data-i="ctaP">No account. Works offline.<br>Nothing leaves your Mac.</p>
+    </div>
+    <div class="cv cta-act">
+      <a class="go" id="dl-cta" href="#install" data-href="/download">
+        <svg class="ar" id="dl-arrow" width="40" height="48" viewBox="0 0 40 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="1.5" y1="24" x2="36" y2="24" vector-effect="non-scaling-stroke"/><path d="M24 12 36 24 24 36"/></svg>
+        <span class="u" data-i="dl">Download for Mac</span>
+      </a>
+      <p class="meta" data-i="meta2"><span class="nw">Free&nbsp;·</span> <span class="nw">macOS 26 or later&nbsp;·</span> <span class="nw">Apple silicon&nbsp;·</span> <span class="nw">460 MB</span></p>
+      <a class="q" id="gh-cta" href="#" data-href="https://github.com/lazydevz-inc/adhd-music">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-code"/></svg>
+        <span class="uq" data-i="gh">Open source on GitHub</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="wrap faq" id="faq">
+  <div class="inner"><div class="faq-grid">
+    <h2 class="faq-h" data-i="faqH">Questions</h2>
+    <div class="qa">
+      <div><h3 data-i="q1">Why does it ask to hear other apps?</h3><p data-i="a1">macOS calls it System Audio Recording. The app only checks if another app, like a YouTube video, is playing, so it can pause and play again. Nothing is recorded.</p></div>
+      <div><h3 data-i="q2">Does it work offline?</h3><p data-i="a2">Yes. There is no account to make, and nothing leaves your Mac.</p></div>
+      <div><h3 data-i="q3">Is it really free?</h3><p data-i="a3">Yes, free to download and use. The code is open on <a class="inl" id="gh-faq" href="#" data-href="https://github.com/lazydevz-inc/adhd-music">GitHub</a>.</p></div>
+      <div><h3 data-i="q4">Which Macs does it run on?</h3><p data-i="a4">Macs with Apple silicon on macOS 26 or later. The download is about 460 MB.</p></div>
+    </div>
+  </div></div>
+</section>
+</main>
+
+<footer class="wrap foot">
+  <div class="inner">
+    <div class="foot-top">
+      <div class="brand">
+        <img src="assets/icon.png" width="512" height="512" alt="" loading="lazy" decoding="async">
+        <b>ADHD Music</b>
+        <span class="made" data-i="made">Made by someone with ADHD, for people with ADHD.</span>
+      </div>
+      <div class="foot-links">
+        <a class="q" id="dl-foot" href="#install" data-href="/download"><span class="uq" data-i="fDl">Download</span></a>
+        <a class="q" id="gh-foot" href="#" data-href="https://github.com/lazydevz-inc/adhd-music"><span class="uq">GitHub</span></a>
+        <a class="q" id="pv-foot" href="/privacy"><span class="uq" data-i="fPv">Privacy</span></a>
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" id="lang-en-foot" data-lang-btn="en" aria-pressed="true" lang="en">EN</button>
+          <span class="sep" aria-hidden="true">·</span>
+          <button type="button" id="lang-ko-foot" data-lang-btn="ko" aria-pressed="false" lang="ko" aria-label="한국어">KO</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+</div>
+
+<script>
+(() => {
+'use strict';
+const D = document, W = window;
+const $ = (s, r) => (r || D).querySelector(s);
+const $$ = (s, r) => Array.from((r || D).querySelectorAll(s));
+const pg = $('#page');
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const sstep = (a, b, v) => { const t = clamp01((v - a) / (b - a)); return t * t * (3 - 2 * t); };
+const f1 = v => (Math.round(v * 10) / 10);
+const TAU = Math.PI * 2;
+const BP = 1100, TIP = 0.62, BPM = 97.57;
+/* the line is steady after 75% of the hero's hold; the rest of the hold shows it at rest */
+const SETTLE = 0.75;
+const FOCUS_TIME = '2:14:02';
+
+const mqReduce = W.matchMedia('(prefers-reduced-motion: reduce)');
+let reduce = mqReduce.matches;
+
+/* ---------- copy ---------- */
+const KO = {
+  heroSub: '집중할 때 틀어 두는 잔잔한 반복 음악.<br>Mac 메뉴바에 머물러요.',
+  dl: 'Mac용 내려받기',
+  meta1: '<span class="nw">무료&nbsp;·</span> <span class="nw">460MB&nbsp;·</span> <span class="nw">macOS 26 이상&nbsp;·</span> <span class="nw">Apple 실리콘</span>',
+  gh: 'GitHub에서 코드 보기',
+  r1t: '박자에 맞춘 떨림', r1d: 'ADHD 집중을 위해 넣은 미세한 떨림이에요. 주의가 덜 흩어져요.',
+  r2t: '말소리 없음', r2d: '가사가 있으면 생각이 말로 끌려가요. 여기엔 말소리가 없어요.',
+  r3t: '튀는 순간 없음', r3d: 'ADHD 뇌는 갑자기 나는 소리에 더 크게 반응해요. 그런 순간이 없어요.',
+  r4t: '멜로디 없는 반복', r4d: '한 가지 패턴이 계속 돌아요. 따라갈 멜로디가 없어 배경에 머물러요.',
+  ru1t: '말소리 없음', ru1f: '가사는 읽고 기억하는 걸 가장 크게 방해해요.', ru1d: '그래서 모든 곡에 가사도, 말소리도 없어요.',
+  ru2t: '튀는 순간 없음', ru2f: 'ADHD는 갑작스러운 소리에 더 크게 반응해요.', ru2d: '그래서 갑자기 터지는 소리 없이 고르게 흘러가요.',
+  ru3t: '멜로디 없는 반복', ru3f: '익숙한 반복은 따라가는 멜로디보다 덜 방해돼요.', ru3d: '그래서 곡마다 한 가지 패턴이 반복되고, 쫓아갈 멜로디가 없어요.',
+  ru4t: '박자에 맞춘 떨림', ru4f: '잔잔한 떨림이 주의가 쉽게 흩어지는 사람에게 도움이 됐어요.', ru4d: '그래서 모든 곡에 박자에 맞춘 미세한 떨림을 넣었어요.',
+  sdl: '들리는 것', sdh: '배경에 머무는 음악.', sdp1: 'Lo-fi, Grooves, Electronic 27곡이고, 곡마다 30분 동안 끊김 없이 이어져요.',
+  sdp2: '섞어 틀면 방금 들은 곡은 차례를 기다리고, 일찍 넘긴 곡은 점점 덜 나와요. 떨림 세기도 직접 골라요.',
+  c1l: '왜 도움이 되나', c1h: 'ADHD를 위해 처음부터 만들었어요.',
+  h1Hidden: ': 흩어진 생각이 한 줄로.', resC: 'ADHD와 소리에 관한 연구',
+  cwl: '보기', cwh: '45초 만에 보기.', cwp: '실제 앱으로 짧게 둘러봐요. 한 번 누르면 재생, 음악 뒤의 연구, 영상을 틀면 멈추는 모습까지.',
+  c1p1: 'ADHD와 소리에 관한 연구 23편을 읽었어요. 거기서 규칙 네 가지가 나왔고, 모든 곡이 네 가지를 다 지켜요.',
+  c1p2: 'Lo-fi, Grooves, Electronic 27곡이고, 곡마다 30분 동안 끊김 없이 이어져요. 섞어 틀면 방금 들은 곡은 차례를 기다리고, 일찍 넘긴 곡은 점점 덜 나와요.',
+  sndT: '원하면 음악 밑에 소리를 깔아요',
+  snd1: '빗소리', snd2: '파도', snd3: '시냇물', snd4: '브라운 노이즈', snd5: '핑크 노이즈', snd6: '화이트 노이즈',
+  n1c: '곡, 말소리 없음', n2c: '곡마다 끊김 없이', pulseC: '모든 곡에 박자에 맞춘 잔잔한 떨림이 있어요.',
+  lg1: '12곡', lg2: '8곡', lg3: '7곡',
+  c2l: '플레이어', c2h: '메뉴바에 머물러요.',
+  c2p1: '메뉴바의 시간을 누르면 플레이어가 열리고, 다시 누르면 들어가요.',
+  c2p2: '큰 숫자는 오늘 집중한 시간이에요. 음악이 나오는 동안만 세요.',
+  co1: '오늘 집중한 시간', co2: '자유, 타이머, 포모도로', co3: 'Mix 또는 한 장르', co3d: 'Lo-fi, Grooves, Electronic 중에서.', co4: '오늘을 한눈에', co4d: '누르면 기록으로 가요.',
+  mbDate: '화 오후 9:45',
+  c3l: '자동으로 멈춤', c3h: '다른 일이 끼어들면 비켜 줘요.',
+  c3p: '음악이 멈췄다가 알아서 다시 나와요. 멈춘 시간은 기록에 들어가지 않아요.',
+  p1t: '자리를 비우면', p1d: '화면을 잠그거나 잠자기에 들면 멈추고, 돌아오면 다시 틀어요.',
+  p2t: '통화하는 동안', p2d: '마이크나 카메라가 켜지면 멈추고, 통화가 끝나면 다시 틀어요.',
+  p3t: '다른 앱에서 소리가 나면', p3d: '유튜브 영상처럼 다른 소리가 나면 멈추고, 조용해지면 다시 틀어요.',
+  p4t: '헤드폰을 빼면', p4d: '스피커로 새어 나가지 않게 멈추고, 다시 연결하면 이어서 틀어요.',
+  c4l: '기록', c4h: '집중이 어디로 갔는지 봐요.',
+  c4p: '오늘 집중한 시간은 메뉴바에 바로 보여요. 기록에는 구간마다 적어 둔 할 일과 들은 음악이 남아요.',
+  mbigC: '오늘, 메뉴바에서',
+  hl1: '주 띠', hl2: '하루 시간표', hl3: '할 일별 시간', hl4: '들은 음악', hl5: '월 보기',
+  inL: '설치', inH: '세 단계면 돼요.',
+  s1: '.dmg 파일을 열어요.', s2: 'ADHD Music을 Applications로 끌어 놓아요.', s3: '열면 메뉴바에 나타나요.',
+  inNote: '유튜브 영상이 나올 때 멈출 수 있도록, 다른 앱 소리를 들어도 되는지 macOS가 한 번 물어요. 녹음은 하지 않아요.',
+  inMeta: 'Apple 공증을 받은 .dmg 파일, 약 460MB.',
+  ctaH: '차분한 한 줄이<br>여기서 시작돼요.',
+  ctaP: '계정이 필요 없어요. 인터넷 없이도 돼요.<br>아무것도 Mac 밖으로 나가지 않아요.',
+  meta2: '<span class="nw">무료&nbsp;·</span> <span class="nw">macOS 26 이상&nbsp;·</span> <span class="nw">Apple 실리콘&nbsp;·</span> <span class="nw">460MB</span>',
+  faqH: '자주 묻는 질문',
+  q1: '왜 다른 앱 소리를 들어도 되는지 물어요?',
+  a1: 'macOS에서는 ‘시스템 오디오 녹음’이라고 불러요. 유튜브 영상처럼 다른 앱에서 소리가 나는지만 확인해서, 멈췄다가 다시 틀어요. 녹음은 하지 않아요.',
+  q2: '인터넷 없이도 돼요?', a2: '네. 만들 계정도 없고, 아무것도 Mac 밖으로 나가지 않아요.',
+  q3: '정말 무료예요?', a3: '네, 내려받기도 쓰기도 무료예요. 코드는 <a class="inl" id="gh-faq" href="#" data-href="https://github.com/lazydevz-inc/adhd-music">GitHub</a>에 공개돼 있어요.',
+  q4: '어떤 Mac에서 돼요?', a4: 'macOS 26 이상, Apple 실리콘 Mac에서 돼요. 내려받는 파일은 약 460MB예요.',
+  made: 'ADHD가 있는 사람이, ADHD가 있는 사람들을 위해 만들었어요.',
+  fDl: '내려받기', fPv: '개인정보',
+};
+const KO_ALT = {
+  altIcon: 'ADHD Music 앱 아이콘: 흰 유리 위에 검은 헤드셋과 청록 음파',
+  altPanel: '메뉴바에서 열린 플레이어: 오늘 집중한 시간, 자유, 재생 버튼, Mix와 지금 곡, 오늘 막대',
+  altStage: '메뉴바 시간 아래 열린 플레이어 패널',
+  altSet: '설정의 자동으로 멈춤: 자리 비움, 통화, 다른 소리, 헤드폰 스위치 네 개가 모두 켜져 있고, 아래에 Chrome 소리가 나서 멈췄어요 표시',
+  altSetM: '설정의 자동으로 멈춤: 자리 비우면 멈춤, 다른 소리 나면 멈춤 스위치가 켜져 있어요',
+  altChip: '메인 화면에는 Chrome 소리가 나서 멈췄어요 라고 보여요',
+  altHist: '기록 화면: 이번 주 띠, 집중한 세 구간이 놓인 하루 시간표, 할 일별 시간과 들은 음악',
+  altDmg: '디스크 이미지 창: ADHD Music 앱, 물결 화살표, Applications 폴더와 끌어다 놓기 안내'
+};
+const UI = {
+  en: { listen: 'Listen', pause: 'Pause', listenAria: 'Listen to Plain Loop, 25 seconds', pauseAria: 'Pause Plain Loop', lang: 'Language' },
+  ko: { listen: '들어 보기', pause: '멈추기', listenAria: 'Plain Loop 25초 들어 보기', pauseAria: 'Plain Loop 멈추기', lang: '언어' }
+};
+const EN = {}, EN_ALT = { altSetM: 'Settings, Pauses by itself: Pause when I step away and Pause when other sound plays, both on' };
+$$('[data-i]').forEach(el => { if (!(el.dataset.i in EN)) EN[el.dataset.i] = el.innerHTML; });
+$$('[data-ia]').forEach(el => { if (!(el.dataset.ia in EN_ALT)) EN_ALT[el.dataset.ia] = el.alt; });
+/* the phone crop of a capture can show less than the desktop one: it gets its own alt */
+function applyAlts() {
+  const alts = lang === 'ko' ? KO_ALT : EN_ALT, narrow = W.innerWidth < BP;
+  $$('[data-ia]').forEach(el => { const k = narrow && el.dataset.iaM ? el.dataset.iaM : el.dataset.ia, v = alts[k]; if (v && el.alt !== v) el.alt = v; });
+}
+$$('img[data-ko]').forEach(img => { img.dataset.en = img.getAttribute('src'); });
+$$('.js-ftime').forEach(el => { el.textContent = FOCUS_TIME; });
+
+let lang = 'en';
+function wireLinks() {
+  $$('a[data-href]').forEach(a => {
+    if (a.dataset.wired) return; a.dataset.wired = '1';
+    const u = a.dataset.href || '';
+    if (u && u.charAt(0) !== '[') { a.href = u; return; }
+    if (a.getAttribute('href') === '#') a.addEventListener('click', e => e.preventDefault());
+  });
+}
+function setLang(l, save) {
+  lang = l === 'ko' ? 'ko' : 'en';
+  pg.setAttribute('lang', lang);
+  D.documentElement.setAttribute('lang', lang);
+  const dict = lang === 'ko' ? KO : EN;
+  $$('[data-i]').forEach(el => { const v = dict[el.dataset.i]; if (v != null && el.innerHTML !== v) el.innerHTML = v; });
+  applyAlts();
+  $$('img[data-ko]').forEach(img => { const s = lang === 'ko' ? img.dataset.ko : img.dataset.en; if (img.getAttribute('src') !== s) img.setAttribute('src', s); });
+  $$('[data-lang-btn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.langBtn === lang)));
+  $$('.lang').forEach(g => g.setAttribute('aria-label', UI[lang].lang));
+  if (save) { try { localStorage.setItem('adhdmusic.lang', lang); } catch (e) {} }
+  wireLinks();
+  updateListen();
+  scheduleBuild();
+}
+$$('[data-lang-btn]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.langBtn, true)));
+
+/* ---------- listen (plain-loop-clip, only after a click) ---------- */
+const listenBtn = $('#listen'), listenLbl = $('#listen-label'), listenTime = $('#listen-time');
+const CLIP = 'assets/plain-loop-clip.mp3';
+let audio = null, actx = null, lastSec = -1;
+const fmt = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+function isPlaying() { return !!(audio && !audio.paused && !audio.ended); }
+/* the time label follows the audio itself, so it also runs with reduced motion */
+function setTimeLabel() {
+  if (isPlaying()) {
+    const sec = Math.floor(audio.currentTime);
+    if (sec !== lastSec) { lastSec = sec; listenTime.textContent = fmt(audio.currentTime) + ' / 0:25'; }
+  } else {
+    listenTime.textContent = audio && audio.currentTime > 0.5 && !audio.ended ? fmt(audio.currentTime) + ' / 0:25' : '0:25';
+    lastSec = -1;
+  }
+}
+function updateListen() {
+  const p = isPlaying();
+  listenBtn.classList.toggle('is-playing', p);
+  listenBtn.setAttribute('aria-label', p ? UI[lang].pauseAria : UI[lang].listenAria);
+  listenLbl.textContent = p ? UI[lang].pause : UI[lang].listen;
+  $('#pulse').classList.toggle('is-on', p);
+  lastSec = -1;
+  setTimeLabel();
+}
+listenBtn.addEventListener('click', () => {
+  if (!audio) {
+    audio = new Audio();
+    audio.preload = 'auto';
+    /* a gain node keeps the volume modest everywhere, iPhone included (media volume is fixed there) */
+    let routed = false;
+    try {
+      const AC = W.AudioContext || W.webkitAudioContext;
+      if (AC && new URL(CLIP, location.href).origin === location.origin) {
+        actx = new AC();
+        const src = actx.createMediaElementSource(audio), gain = actx.createGain();
+        gain.gain.value = 0.4;
+        src.connect(gain); gain.connect(actx.destination);
+        routed = true;
+      }
+    } catch (e) { actx = null; }
+    if (!routed) audio.volume = 0.42;
+    audio.src = CLIP;
+    audio.addEventListener('ended', () => { audio.currentTime = 0; updateListen(); kick(); });
+    audio.addEventListener('pause', updateListen);
+    audio.addEventListener('play', () => { updateListen(); kick(); });
+    audio.addEventListener('timeupdate', setTimeLabel);
+  }
+  if (isPlaying()) audio.pause();
+  else {
+    if (actx && actx.state === 'suspended') { const r = actx.resume(); if (r && r.catch) r.catch(() => {}); }
+    const p = audio.play(); if (p && p.catch) p.catch(() => updateListen());
+  }
+});
+/* 0..1 on each beat: a short soft rise, then a slow fall; fades in and out with the clip */
+function beat() {
+  if (!isPlaying()) return 0;
+  const t = audio.currentTime, dur = audio.duration || 24.6;
+  const ph = (t * BPM / 60) % 1;
+  const env = sstep(0, 1.4, t) * (1 - sstep(dur - 2.4, dur, t));
+  const k = ph < 0.09 ? Math.sin(ph / 0.09 * Math.PI / 2) : Math.exp(-(ph - 0.09) * 4.2);
+  return k * env;
+}
+
+/* ---------- path builder (lines + quarter arcs, measured exactly) ---------- */
+class Route {
+  constructor(x, y) { this.sx = x; this.sy = y; this.x = x; this.y = y; this.segs = []; this.len = 0; }
+  line(x, y) {
+    const l = Math.hypot(x - this.x, y - this.y);
+    if (l > 0.01) { this.segs.push({ k: 0, x0: this.x, y0: this.y, x1: x, y1: y, l, s0: this.len }); this.len += l; }
+    this.x = x; this.y = y; return this;
+  }
+  arc(cx, cy, r, a0, a1) {
+    const l = Math.abs(a1 - a0) * r, x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+    this.segs.push({ k: 1, cx, cy, r, a0, a1, l, s0: this.len, x1, y1 });
+    this.len += l; this.x = x1; this.y = y1; return this;
+  }
+  turn(h1x, h1y, h2x, h2y, R) {
+    const cx = this.x + h2x * R, cy = this.y + h2y * R, a0 = Math.atan2(this.y - cy, this.x - cx);
+    const ex = this.x + (h1x + h2x) * R, ey = this.y + (h1y + h2y) * R;
+    let d = Math.atan2(ey - cy, ex - cx) - a0;
+    while (d > Math.PI) d -= TAU; while (d < -Math.PI) d += TAU;
+    return this.arc(cx, cy, R, a0, a0 + d);
+  }
+  semi(ux, uy, nx, ny, r) {
+    const cx = this.x + ux * r, cy = this.y + uy * r, a0 = Math.atan2(-uy, -ux);
+    let d = Math.atan2(ny, nx) - a0;
+    while (d > Math.PI) d -= TAU; while (d < -Math.PI) d += TAU;
+    this.arc(cx, cy, r, a0, a0 + d); return this.arc(cx, cy, r, a0 + d, a0 + 2 * d);
+  }
+  /* the app icon's wave: up, arch, down, under, up, arch, back to the line */
+  glyph(ux, uy, nx, ny, r, h) {
+    const px = this.x, py = this.y, s0 = this.len;
+    this.line(px + nx * h, py + ny * h);
+    this.semi(ux, uy, nx, ny, r);
+    this.line(px + ux * 2 * r - nx * h, py + uy * 2 * r - ny * h);
+    this.semi(ux, uy, -nx, -ny, r);
+    this.line(px + ux * 4 * r + nx * h, py + uy * 4 * r + ny * h);
+    this.semi(ux, uy, nx, ny, r);
+    this.line(px + ux * 6 * r, py + uy * 6 * r);
+    return [s0, this.len];
+  }
+  d() {
+    let s = 'M' + f1(this.sx) + ' ' + f1(this.sy);
+    for (const g of this.segs) s += g.k ? 'A' + g.r + ' ' + g.r + ' 0 0 ' + (g.a1 > g.a0 ? 1 : 0) + ' ' + f1(g.x1) + ' ' + f1(g.y1) : 'L' + f1(g.x1) + ' ' + f1(g.y1);
+    return s;
+  }
+  at(s) {
+    const S = this.segs; if (!S.length) return { x: this.sx, y: this.sy };
+    s = clamp(s, 0, this.len);
+    let lo = 0, hi = S.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (S[m].s0 <= s) lo = m; else hi = m - 1; }
+    const g = S[lo], u = g.l ? (s - g.s0) / g.l : 0;
+    if (!g.k) return { x: g.x0 + (g.x1 - g.x0) * u, y: g.y0 + (g.y1 - g.y0) * u };
+    const a = g.a0 + (g.a1 - g.a0) * u; return { x: g.cx + g.r * Math.cos(a), y: g.cy + g.r * Math.sin(a) };
+  }
+}
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+/* a pen scribble in zone units (0..1): it leaves the panel at A, wanders through M with small loops, and arrives at B above the descent */
+function makeScribble(seed, A, M, B, loops, amp) {
+  const rnd = mulberry32(seed), ph = Array.from({ length: 10 }, () => rnd() * TAU);
+  return (t, w, o) => {
+    const u = 1 - t, env = Math.pow(Math.sin(Math.PI * t), 0.6), env2 = sstep(0, 0.1, t) * (1 - sstep(0.84, 1, t));
+    const bx = u * u * A[0] + 2 * u * t * M[0] + t * t * B[0], by = u * u * A[1] + 2 * u * t * M[1] + t * t * B[1];
+    o.cx = bx + env * amp * (0.9 * Math.sin(TAU * 1.35 * t + ph[0] + w * 0.8) + 0.45 * Math.sin(TAU * 2.9 * t + ph[1] - w * 0.55));
+    o.cy = by + env * amp * (0.85 * Math.sin(TAU * 1.6 * t + ph[2] - w * 0.65) + 0.4 * Math.cos(TAU * 3.4 * t + ph[3] + w * 0.45));
+    const rr = (0.09 + 0.04 * Math.sin(TAU * 3.7 * t + ph[4] + w) + 0.02 * Math.sin(TAU * 8.3 * t + ph[5])) * env2;
+    const th = TAU * loops * t + 1.4 * Math.sin(TAU * 1.9 * t + ph[6]) + w * 1.5;
+    const ax = 1.2 + 0.35 * Math.sin(TAU * 2.1 * t + ph[7]), ay = 0.85 + 0.3 * Math.cos(TAU * 2.6 * t + ph[8]);
+    const jit = 0.006 * Math.sin(TAU * 29 * t + ph[9]) * env2;
+    o.lx = rr * Math.cos(th) * ax + jit; o.ly = rr * Math.sin(th) * ay - jit;
+  };
+}
+const soft = v => 0.5 + 0.47 * Math.tanh((v - 0.5) / 0.47);
+
+/* ---------- elements ---------- */
+const svgEl = $('#thread'), trackEl = $('#track'), lineEl = $('#line'), endEl = $('#endrun'), heroEl = $('#hero-line'), tipEl = $('#tip');
+/* the hero's own layer holds still with it: its line, and the first stretch of the thread under it */
+const hTrack = $('#hero-track'), hStick = $('#hero-stick'), heroG = $('#hero-g'), belowR = $('#below-hero-r');
+const trackH = $('#track-h'), lineH = $('#line-h'), tipH = $('#tip-h');
+const LINES = [lineEl, lineH], TIPS = [tipEl, tipH];
+const grad = $('#endGrad'), hgrad = $('#heroGrad'), hg0 = $('#hg0'), hg1 = $('#hg1');
+const dust = $('#dust'), dctx = dust.getContext('2d');
+const tiltEl = $('#tilt'), beatEl = $('#beat');
+const goEl = $('#dl-cta');
+const pulsePath = $('#pulse-path'), pulseG = $('#pulse-g');
+const RINGS = [[21.2, 11.6, 57.5, 11], [35.5, 23.8, 28.9, 5.6], [20.3, 67.9, 59, 5.5], [4.7, 85.6, 90.6, 11.4]];
+
+/* card pulse: the same wave as the app icon, repeated */
+(function () {
+  const a = 8.1667; let d = 'M0 16 V10', x = 0, up = true;
+  for (let k = 0; k < 44; k++) { const nx = x + 2 * a; d += 'A' + a + ' ' + a + ' 0 0 ' + (up ? 1 : 0) + ' ' + f1(nx) + ' ' + (up ? 10 : 22) + ' V' + (up ? 22 : 10); x = nx; up = !up; }
+  pulsePath.setAttribute('d', d);
+})();
+
+/* ---------- state ---------- */
+let G = null, raf = 0, lastT = 0, buildQueued = false;
+let mCur = 0, Lcur = 0, introE = reduce ? 1 : 0, heroVis = true, step = -1, mStepAuto = -1, playE = 0;
+let tiltX = 0, tiltY = 0;
+const mouse = { cx: -1e5, cy: -1e5, on: false };
+
+function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+/* untangle follows the scroll through the hero's hold. The sweep along the line (drawHero) already eases in and out,
+   so the hold maps on evenly; its first few pixels lift past the line's anchored end, so the line answers at once */
+function untangle(sc) { const p = clamp01((sc - G.u0) / (G.u1 - G.u0)); return 0.9 * p + 0.1 * Math.min(1, p / 0.04); }
+/* how far the hero sits above its final place (where the page leaves it after the hold) */
+function heroDy(sc) { const h = G.hp; return clamp(sc + h.T - h.top, 0, h.dist) - h.dist; }
+function safeTop() {
+  const p = D.createElement('div');
+  p.style.cssText = 'position:absolute;left:0;top:0;width:0;visibility:hidden;height:env(safe-area-inset-top,0px)';
+  pg.appendChild(p); const h = p.offsetHeight; p.remove(); return h;
+}
+/* where the held hero sits (its sticky top), so the name, Listen, Download, the player and the line show while it
+   holds. No text is sliced at either edge, the name keeps 16 px under the top, and the language switch is either
+   whole or out of view.
+   Wide: the name through the four reasons. In a window too short for that, the reasons wait below it instead of
+   sitting half cut, and the player's first line of text stays in.
+   One column: the name through the player, with the player closer and then smaller (not under 232 px) when the window
+   is short. If that still does not fit, the top edge moves to the gap above the subtitle, then above Listen */
+const PANEL_TEXT = 0.046; /* the player picture's first line of text, as a share of its height */
+function frameHold(desk, vh) {
+  const ps = pg.style;
+  if (reduce || desk) { ps.removeProperty('--hero-panel-gap'); ps.removeProperty('--hero-panel-w'); }
+  if (reduce) return 0;
+  const st = safeTop();
+  const rel = el => { const s = hStick.getBoundingClientRect(), r = el.getBoundingClientRect(); return { t: r.top - s.top, b: r.bottom - s.top }; };
+  const panel = $('#hero-panel');
+  const nameEdge = Math.max(0, rel($('#top h1')).t - 16 - st);
+  let t, lower;
+  if (desk) {
+    const P = rel(panel), RS = rel($('#reasons'));
+    lower = -Math.min(nameEdge, Math.max(0, P.t + PANEL_TEXT * (P.b - P.t) - 8 - st));
+    t = vh - (RS.b + 8) >= lower ? clamp(vh - (RS.b + 24), lower, 0) : clamp(vh - RS.t, lower, 0);
+  } else {
+    const k = 1002 / 640;
+    const top64 = rel(panel).t - (parseFloat(ps.getPropertyValue('--hero-panel-gap')) || 64) + 64;
+    const natW = clamp(W.innerWidth * 0.64, 232, 320);
+    /* the widest player that ends 16 px above the bottom of a window whose top edge is at `edge` */
+    const room = (edge, gap) => (edge + vh - 16 - (top64 - 64 + gap)) / k;
+    const edges = [nameEdge, Math.max(0, rel($('#top .sub')).t - 8 - st), Math.max(0, rel($('#listen')).t - 12 - st)];
+    let pick = null;
+    for (const e of edges) {
+      if (room(e, 64) >= natW) { pick = { e, gap: 64, w: natW }; break; }
+      if (room(e, 32) >= 232) { pick = { e, gap: 32, w: Math.min(natW, room(e, 32)) }; break; }
+    }
+    if (!pick) pick = { e: edges[2], gap: 32, w: 232 };
+    if (pick.gap === 64) ps.removeProperty('--hero-panel-gap'); else ps.setProperty('--hero-panel-gap', pick.gap + 'px');
+    if (pick.w > natW - 0.5) ps.removeProperty('--hero-panel-w'); else ps.setProperty('--hero-panel-w', Math.floor(pick.w) + 'px');
+    lower = -pick.e;
+    t = pick.e === nameEdge ? clamp(vh - (rel(panel).b + 16), lower, 0) : lower;
+  }
+  const L = rel($('.topbar .lang'));
+  if (t + L.t < st && t + L.b > 0) t = Math.max(-rel($('.topbar')).b, lower);
+  return Math.round(t);
+}
+function scheduleBuild() { if (buildQueued) return; buildQueued = true; requestAnimationFrame(() => { buildQueued = false; build(); kick(); }); }
+
+function build() {
+  const vw = W.innerWidth, vh = W.innerHeight;
+  const desk = vw >= BP;
+  if (desk) {
+    const cw = $('#stage-col').getBoundingClientRect().width;
+    const k = Math.max(0.5, Math.min(1, cw / 704, (vh - 72) / 612));
+    pg.style.setProperty('--k', k.toFixed(4));
+    /* callout text never renders below 94% of its size, even when the stage shrinks */
+    pg.style.setProperty('--q', (Math.max(k, 0.94) / k).toFixed(4));
+    const th = $('#player-text').getBoundingClientRect().height;
+    pg.style.setProperty('--ch', Math.ceil(Math.max(612 * k, th)) + 'px');
+  }
+  /* the hero's hold: about one screen of scroll (a little less on phones) */
+  const hold = reduce ? 0 : Math.round(desk ? clamp(vh * 0.9, 560, 960) : clamp(vh * 0.75, 420, 680));
+  const holdTop = frameHold(desk, vh);
+  pg.style.setProperty('--hero-top', holdTop + 'px');
+  pg.style.setProperty('--hero-pin', hold + 'px');
+  const pr = pg.getBoundingClientRect();
+  const R = el => { const r = el.getBoundingClientRect(); return { x: r.left - pr.left, y: r.top - pr.top, w: r.width, h: r.height, r: r.right - pr.left, b: r.bottom - pr.top }; };
+  const g = { desk, vw, pageTop: pr.top + W.scrollY, pageLeft: pr.left + W.scrollX };
+  const sc0 = W.scrollY - g.pageTop;
+  /* everything in the hero is measured where it sits after the hold, wherever it is held right now */
+  const trR = R(hTrack), stR = R(hStick);
+  const hp = { top: trR.y, T: holdTop, dist: hold, rel: trR.b - stR.h, x: stR.x, bot: trR.b };
+  g.hp = hp;
+  const shift = hp.rel - stR.y;
+  const RH = el => { const r = R(el); r.y += shift; r.b += shift; return r; };
+  heroG.setAttribute('transform', 'translate(' + (-hp.x).toFixed(2) + ' ' + (-hp.rel).toFixed(2) + ')');
+  belowR.setAttribute('y', hp.bot.toFixed(2));
+
+  /* hero geometry */
+  const text = RH($('#hero-text')), panel = RH($('#hero-panel')), reasons = RH($('#reasons'));
+  const lis = $$('#reasons li');
+  const rail = text.x + 8;
+  g.rail = rail;
+  const H = { n: desk ? 720 : 420 };
+  let rt, J0;
+  if (desk) {
+    const lane0 = (RH(lis[1]).r + RH(lis[2]).x) / 2, yp = panel.y + panel.h * 0.517, Rr = 32;
+    J0 = { x: lane0, y: panel.b + 28 };
+    rt = new Route(panel.x + 40, yp);
+    const gc = (lane0 + Rr + panel.x) / 2;
+    rt.line(gc + 45, yp);
+    H.gs = rt.glyph(-1, 0, 0, -1, 15, 22);
+    rt.line(lane0 + Rr, yp); rt.turn(-1, 0, 0, 1, Rr); rt.line(lane0, J0.y);
+    /* the tangle keeps to the right part of the gap, where the line leaves the panel; the middle stays open */
+    H.zone = { x0: text.r + 0.4 * (panel.x - text.r), x1: panel.x + 40, y0: panel.y + 10, y1: panel.b - 30 };
+    H.base = { k: 'y', v: yp };
+    g.lane0 = lane0;
+  } else {
+    const y0 = text.b + 26;
+    J0 = { x: rail, y: panel.b };
+    rt = new Route(rail, y0);
+    const gy = (panel.y + panel.b) / 2 - 18;
+    rt.line(rail, gy); H.gs = rt.glyph(0, 1, 1, 0, 5.5, 7.5); rt.line(rail, J0.y);
+    H.zone = { x0: text.x, x1: panel.x + 70, y0: y0 + 6, y1: panel.b - 24 };
+    H.base = { k: 'x', v: rail };
+    g.lane0 = rail;
+  }
+  g.J0 = J0;
+  hgrad.setAttribute('x1', f1(rt.sx)); hgrad.setAttribute('y1', f1(rt.sy)); hgrad.setAttribute('x2', f1(J0.x)); hgrad.setAttribute('y2', f1(J0.y));
+  const N = H.n;
+  H.S = new Float32Array(N * 2); H.off = new Float32Array(N * 2); H.t = new Float32Array(N); H.win = new Float32Array(N);
+  H.px = new Float32Array(N); H.py = new Float32Array(N); H.mix = new Float32Array(N);
+  H.calm = (G && G.H && G.H.calm && G.H.calm.length === N) ? G.H.calm : new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const t = i / (N - 1), s = t * rt.len, p = rt.at(s);
+    H.t[i] = t; H.S[2 * i] = p.x; H.S[2 * i + 1] = p.y;
+    H.win[i] = sstep(0, 0.05, t) * (1 - sstep(0.9, 1, t));
+    if (s >= H.gs[0] && s <= H.gs[1]) {
+      if (H.base.k === 'y') H.off[2 * i + 1] = p.y - H.base.v; else H.off[2 * i] = p.x - H.base.v;
+    }
+  }
+  /* the scribble lives in the empty zone between the words and the panel */
+  const Z = H.zone, zw = Z.x1 - Z.x0, zh = Z.y1 - Z.y0;
+  const sA = [(H.S[0] - Z.x0) / zw, (H.S[1] - Z.y0) / zh];
+  const sB = [(H.S[2 * (N - 1)] - Z.x0) / zw, 1];
+  if (desk) { sA[0] = Math.min(sA[0], 0.96); } else { sA[1] = 0; }
+  H.scr = desk ? makeScribble(5, sA, [0.4, 0.32], sB, 13, 0.2) : makeScribble(23, sA, [0.42, 0.45], sB, 12, 0.16);
+  H.sx = zw; H.sy = zh; H.ax = Z.x0; H.ay = Z.y0;
+  const o = {};
+  H.o = o;
+  /* scroll range for untangling: from the first pixel of scroll (a hero held higher than its place takes a short
+     lead-in first) to SETTLE of the hold; the line rests for the rest of it, and the thread takes over at its end */
+  g.u0 = hp.top;
+  g.u1 = hp.top - hp.T + Math.max(1, hp.dist * SETTLE);
+  g.s1 = hp.top - hp.T + hp.dist;
+
+  /* particles: loose specks of attention around the tangle */
+  const rnd = mulberry32(desk ? 7 : 9), cnt = desk ? 36 : 22;
+  H.dust = [];
+  for (let k = 0; k < cnt; k++) {
+    const t = rnd(), ang = rnd() * TAU, rad = Math.sqrt(rnd()) * (desk ? 96 : 56);
+    H.dust.push({ t, i: Math.round(t * (N - 1)), ox: Math.cos(ang) * rad, oy: Math.sin(ang) * rad * 0.8, f1: 0.25 + rnd() * 0.5, f2: 0.2 + rnd() * 0.45, p1: rnd() * TAU, p2: rnd() * TAU, amp: 6 + rnd() * 12, r: 0.9 + rnd() * 1.2, a: 0.2 + rnd() * 0.25, calm: 0 });
+  }
+  const pad = 70;
+  H.cv = { x: Math.max(0, Z.x0 - pad), y: Math.max(0, Z.y0 - pad) };
+  H.cv.w = Math.min(pr.width, Z.x1 + pad) - H.cv.x; H.cv.h = (Z.y1 + pad) - H.cv.y;
+  H.clip = desk ? { x0: Z.x0 - 8, x1: Z.x1 + 60, y0: Z.y0 - 16, y1: Z.y1 + 34 } : { x0: Z.x0 - 6, x1: Z.x1 + 40, y0: Z.y0 - 4, y1: Z.y1 + 24 };
+  const dpr = Math.min(2, W.devicePixelRatio || 1);
+  dust.style.left = (H.cv.x - hp.x) + 'px'; dust.style.top = (H.cv.y - hp.rel) + 'px'; dust.style.width = H.cv.w + 'px'; dust.style.height = H.cv.h + 'px';
+  dust.width = Math.round(H.cv.w * dpr); dust.height = Math.round(H.cv.h * dpr);
+  dust.style.display = reduce ? 'none' : '';
+  H.dpr = dpr;
+  g.panelR = { x: panel.x, y: panel.y, w: panel.w, h: panel.h };
+  g.H = H;
+
+  /* the thread: lanes between columns, crossings in the gaps, the app's wave at each crossing */
+  const secs = $$('[data-lane]');
+  const lanes = [{ x: g.lane0, top: J0.y, bot: reasons.b }];
+  for (const sec of secs) {
+    const grid = $('.chap-grid', sec), ct = $('.ct', grid), cv = $('.cv', grid);
+    const a = R(ct), b = R(cv);
+    let x = desk ? (a.x < b.x ? (a.r + b.x) / 2 : (b.r + a.x) / 2) : rail;
+    let top, bot;
+    if (sec.hasAttribute('data-pin') && desk) { const tr = R($('#pin-track')); top = tr.y; bot = tr.b; }
+    else { const gr = R(grid); top = gr.y; bot = gr.b; }
+    lanes.push({ x, top, bot, sec });
+  }
+  const T = new Route(J0.x, J0.y);
+  let cur = lanes[0].x, flip = 1;
+  for (let k = 1; k < lanes.length; k++) {
+    const A = lanes[k - 1], B = lanes[k], yc = (A.bot + B.top) / 2;
+    if (Math.abs(B.x - cur) < 1) {
+      if (!desk) { T.line(cur, yc - 16.5); T.glyph(0, 1, 1, 0, 5.5, 7.5); }
+      continue;
+    }
+    const dir = Math.sign(B.x - cur), Rr = 32;
+    T.line(cur, yc - Rr); T.turn(0, 1, dir, 0, Rr);
+    const span = Math.abs(B.x - cur) - 2 * Rr;
+    if (span >= 90 + 48) { const pre = (span - 90) / 2; T.line(T.x + dir * pre, yc); T.glyph(dir, 0, 0, -flip, 15, 24); flip = -flip; }
+    T.line(B.x - dir * Rr, yc); T.turn(dir, 0, 0, 1, Rr);
+    cur = B.x;
+  }
+  const ar = R($('#dl-arrow'));
+  const ay = ar.y + ar.h / 2, ax = ar.x + (desk ? 1.5 : 1.2);
+  const Re = desk ? 32 : 14;
+  T.line(cur, ay - Re); T.turn(0, 1, 1, 0, Re);
+  const espan = ax - T.x;
+  if (desk && espan >= 90 + 40) { const pre = (espan - 90) / 2; T.line(T.x + pre, ay); T.glyph(1, 0, 0, -1, 15, 24); }
+  const ex0 = Math.max(T.x, ax - 72);
+  T.line(ax, ay);
+  g.T = T; g.total = T.len;
+  const dstr = T.d();
+  trackEl.setAttribute('d', dstr); lineEl.setAttribute('d', dstr); trackH.setAttribute('d', dstr); lineH.setAttribute('d', dstr);
+  for (const ln of LINES) ln.style.strokeDasharray = f1(T.len + 2) + ' ' + f1(T.len + 2);
+  endEl.setAttribute('d', 'M' + f1(ex0) + ' ' + f1(ay) + 'L' + f1(ax) + ' ' + f1(ay));
+  grad.setAttribute('x1', f1(ex0)); grad.setAttribute('x2', f1(ax)); grad.setAttribute('y1', f1(ay)); grad.setAttribute('y2', f1(ay));
+
+  /* scroll -> length table: tip follows a line 62% down the viewport; crossings take a short stretch of scroll */
+  const stp = 6, n = Math.ceil(T.len / stp) + 1;
+  g.v = new Float32Array(n); g.l = new Float32Array(n);
+  let prev = -1e9;
+  for (let i = 0; i < n; i++) { const s = Math.min(T.len, i * stp), p = T.at(s); const v = i ? Math.max(p.y, prev + 0.3 * stp) : p.y; g.v[i] = v; g.l[i] = s; prev = v; }
+  /* vertical lane pieces, for the chapter nodes */
+  g.vsegs = T.segs.filter(s => !s.k && Math.abs(s.x0 - s.x1) < 0.01 && s.y1 > s.y0).map(s => ({ x: s.x0, ya: s.y0, yb: s.y1, s0: s.s0 }));
+
+  /* sticky player chapter */
+  g.pin = null;
+  if (desk) {
+    const tr = R($('#pin-track'));
+    const ch = parseFloat(getComputedStyle(pg).getPropertyValue('--ch')) || 640;
+    const stickTop = Math.max(24, vh / 2 - ch / 2);
+    g.pin = { start: tr.y - stickTop, dist: Math.max(1, tr.h - ch) };
+  } else {
+    const ms = R($('.m-panel'));
+    g.mlist = { top: ms.y, h: ms.h };
+  }
+
+  /* chapter nodes sit on the lane next to their number */
+  g.nodes = [];
+  lanes.slice(1).forEach(L => {
+    const lab = $('.label', L.sec); if (!lab) return;
+    const node = $('.node', lab), lr = R(lab);
+    node.style.setProperty('--ndx', f1(L.x - lr.x) + 'px');
+    let y = lr.y + lr.h / 2, dyn = false;
+    if (desk && L.sec.hasAttribute('data-pin') && g.pin) { y -= clamp(sc0 - g.pin.start, 0, g.pin.dist); dyn = true; }
+    g.nodes.push({ el: node, x: L.x, y, dyn, lit: null });
+  });
+
+  /* gentle depth on the pictures */
+  g.par = $$('[data-par]').map(el => { const r = R(el.parentElement); return { el, c: r.y + r.h / 2, ty: null }; });
+
+  svgEl.setAttribute('height', Math.ceil(pr.height));
+  svgEl.style.height = Math.ceil(pr.height) + 'px';
+  const first = !G;
+  G = g;
+  /* reduced motion: the finished picture, the steady teal line leaving the panel, the whole thread drawn */
+  if (first || reduce) { mCur = reduce ? 1 : Math.max(untangle(sc0), playE); Lcur = reduce ? g.total : lenAtY(tipY(sc0, vh)); }
+  if (reduce) introE = 1;
+  setStep(step < 0 ? 0 : step, true);
+  applyAlts();
+  renderStatic();
+}
+function lenAtY(y) {
+  const V = G.v, L = G.l; if (y <= V[0]) return 0;
+  let lo = 0, hi = V.length - 1; if (y >= V[hi]) return G.total;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (V[m] <= y) lo = m; else hi = m; }
+  const u = (y - V[lo]) / ((V[hi] - V[lo]) || 1); return L[lo] + (L[hi] - L[lo]) * u;
+}
+/* when the hero lets go, the tip starts where the hero's line ends (J0) and eases onto the line 62% down the window */
+function tipY(sc, vh) {
+  const K = G.s1 + vh * TIP - G.J0.y;
+  return sc + vh * TIP - K * (1 - sstep(G.s1, G.s1 + Math.max(700, 1.6 * Math.abs(K)), sc));
+}
+function lenOnLane(x, y) {
+  for (const s of G.vsegs) if (Math.abs(s.x - x) < 0.6 && y >= s.ya - 0.5 && y <= s.yb + 0.5) return s.s0 + (y - s.ya);
+  return lenAtY(y);
+}
+
+/* ---------- callout steps ---------- */
+function setStep(i, force) {
+  if (i === step && !force) return;
+  step = i;
+  $$('.co').forEach(b => b.classList.toggle('on', +b.dataset.step === i));
+  $$('.mco button').forEach(b => b.classList.toggle('on', +b.dataset.step === i));
+  $$('.leaders g').forEach(gq => gq.classList.toggle('on', +gq.dataset.lead === i));
+  const r = RINGS[i];
+  $$('[data-ring]').forEach(el => { el.style.setProperty('--rl', r[0] + '%'); el.style.setProperty('--rt', r[1] + '%'); el.style.setProperty('--rw', r[2] + '%'); el.style.setProperty('--rh', r[3] + '%'); });
+}
+$$('.co').forEach(b => b.addEventListener('click', () => {
+  const i = +b.dataset.step;
+  if (G && G.pin) W.scrollTo({ top: G.pageTop + G.pin.start + (i + 0.5) / 4 * G.pin.dist, behavior: reduce ? 'auto' : 'smooth' });
+  setStep(i);
+}));
+$$('.mco button').forEach(b => b.addEventListener('click', () => setStep(+b.dataset.step)));
+
+/* ---------- drawing ---------- */
+const GREY = [163, 168, 175], TEAL = [97, 172, 188];
+const mixC = (a, b, t) => 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+const RAD = 170, BEAT_AMP = 0.45;
+
+function drawHero(time, dt, pulse) {
+  const H = G.H, N = H.n, o = H.o;
+  const w = reduce ? 0 : time * 0.05;
+  const mx = mouse.on && !reduce ? mouse.cx + W.scrollX - G.pageLeft : -1e5;
+  const my = mouse.on && !reduce ? mouse.cy + W.scrollY - G.pageTop - heroDy(W.scrollY - G.pageTop) : -1e5;
+  const kE = 1 - Math.exp(-dt * 4), sig = 0.9, m = mCur;
+  let sum = 0;
+  for (let i = 0; i < N; i++) {
+    const t = H.t[i];
+    H.scr(t, w, o);
+    const cx = H.ax + soft(o.cx) * H.sx, cy = H.ay + soft(o.cy) * H.sy;
+    let ct = 0;
+    const dx = cx - mx, dy = cy - my, d2 = dx * dx + dy * dy;
+    if (d2 < RAD * RAD) { const q = 1 - Math.sqrt(d2) / RAD; ct = 0.95 * q * q * (3 - 2 * q); }
+    H.calm[i] += (ct - H.calm[i]) * kE;
+    const lk = 1 - H.calm[i];
+    let tx = H.ax + soft(o.cx + o.lx * lk) * H.sx, ty = H.ay + soft(o.cy + o.ly * lk * (H.sx / H.sy)) * H.sy;
+    /* the beat lives on the steady line only: the app's wave swells a little on each beat */
+    const sx = H.S[2 * i] + H.off[2 * i] * pulse * BEAT_AMP, sy = H.S[2 * i + 1] + H.off[2 * i + 1] * pulse * BEAT_AMP;
+    const wv = H.win[i];
+    tx = sx + (tx - sx) * wv; ty = sy + (ty - sy) * wv;
+    let mi = clamp01(m * (1 + sig) - sig * (1 - t)); mi = mi * mi * (3 - 2 * mi);
+    H.mix[i] = mi; sum += mi;
+    H.px[i] = tx + (sx - tx) * mi; H.py[i] = ty + (sy - ty) * mi;
+  }
+  let d = 'M' + f1(H.px[0]) + ' ' + f1(H.py[0]);
+  for (let i = 1; i < N - 1; i++) d += 'Q' + f1(H.px[i]) + ' ' + f1(H.py[i]) + ' ' + f1((H.px[i] + H.px[i + 1]) / 2) + ' ' + f1((H.py[i] + H.py[i + 1]) / 2);
+  d += 'L' + f1(H.px[N - 1]) + ' ' + f1(H.py[N - 1]);
+  heroEl.setAttribute('d', d);
+  const mb = sum / N, ct = sstep(0.55, 1, mb);
+  const c0 = mixC(GREY, TEAL, sstep(0.55, 1, H.mix[0])), c1 = mixC(GREY, TEAL, sstep(0.55, 1, H.mix[N - 1]));
+  if (c0 !== H.c0) { H.c0 = c0; hg0.setAttribute('stop-color', c0); }
+  if (c1 !== H.c1) { H.c1 = c1; hg1.setAttribute('stop-color', c1); }
+  heroEl.style.strokeWidth = (1.5 + 0.5 * ct + pulse * 0.6 * ct).toFixed(2);
+  if (introE < 1) heroEl.style.strokeDasharray = introE.toFixed(4) + ' 1'; else if (heroEl.style.strokeDasharray) heroEl.style.strokeDasharray = '';
+  drawDust(time, dt, mx, my, w);
+}
+function drawDust(time, dt, mx, my, w) {
+  const H = G.H, c = H.cv, o = {}, kE = 1 - Math.exp(-dt * 3), C = H.clip;
+  dctx.setTransform(H.dpr, 0, 0, H.dpr, -c.x * H.dpr, -c.y * H.dpr);
+  dctx.clearRect(c.x, c.y, c.w, c.h);
+  const tm = reduce ? 0 : time;
+  for (const p of H.dust) {
+    H.scr(p.t, w, o);
+    let x = H.ax + soft(o.cx) * H.sx + p.ox, y = H.ay + soft(o.cy) * H.sy + p.oy;
+    const dx = x - mx, dy = y - my, d2 = dx * dx + dy * dy;
+    const ct = d2 < RAD * RAD ? 1 - Math.sqrt(d2) / RAD : 0;
+    p.calm += (ct - p.calm) * kE;
+    const dr = 1 - 0.85 * p.calm;
+    x += p.amp * Math.sin(tm * p.f1 + p.p1) * dr; y += p.amp * 0.8 * Math.cos(tm * p.f2 + p.p2) * dr;
+    x = clamp(x, C.x0, C.x1); y = clamp(y, C.y0, C.y1);
+    const mi = H.mix[p.i], e = mi * mi * (3 - 2 * mi);
+    x += (H.S[2 * p.i] - x) * e; y += (H.S[2 * p.i + 1] - y) * e;
+    const a = p.a * introE * (1 - sstep(0.7, 1, mi)) * (1 - 0.35 * p.calm);
+    if (a < 0.01) continue;
+    dctx.globalAlpha = a;
+    dctx.fillStyle = mixC(GREY, TEAL, sstep(0.3, 0.9, mi));
+    dctx.beginPath(); dctx.arc(x, y, p.r, 0, TAU); dctx.fill();
+  }
+  dctx.globalAlpha = 1;
+}
+function renderStatic() {
+  if (!G) return;
+  drawHero(0, 0.016, 0);
+  updateThread(W.scrollY - G.pageTop, W.innerHeight, 0.016, 0, true);
+}
+function updateThread(sc, vh, dt, pulse, snap) {
+  const Lt = reduce ? G.total : lenAtY(tipY(sc, vh));
+  if (snap || reduce) Lcur = Lt; else Lcur += (Lt - Lcur) * (1 - Math.exp(-dt * 9));
+  const dOff = f1(G.total + 2 - Lcur);
+  for (const ln of LINES) ln.style.strokeDashoffset = dOff;
+  const arrived = Lcur >= G.total - 1.5;
+  endEl.classList.toggle('on', arrived); goEl.classList.toggle('arrived', arrived);
+  let on = !reduce && Lcur > 2 && Lcur < G.total - 1.5;
+  const p = on ? G.T.at(Lcur) : null;
+  for (const nd of G.nodes) {
+    let y = nd.y;
+    if (nd.dyn && G.pin) y += clamp(sc - G.pin.start, 0, G.pin.dist);
+    const lit = Lcur >= lenOnLane(nd.x, y) - 0.5;
+    if (lit !== nd.lit) { nd.lit = lit; nd.el.classList.toggle('lit', lit); }
+    /* a lit node takes the pen tip while it passes, so there is never a double bead */
+    if (p && lit && Math.abs(p.x - nd.x) < 40 && Math.abs(p.y - y) < 64) on = false;
+  }
+  const tf = p ? 'translate(' + f1(p.x) + ' ' + f1(p.y) + ') scale(' + (1 + pulse * 0.55).toFixed(3) + ')' : null;
+  for (const tp of TIPS) { tp.classList.toggle('on', on); if (tf) tp.setAttribute('transform', tf); }
+  return Math.abs(Lt - Lcur) > 0.3;
+}
+
+function frame(now) {
+  raf = 0;
+  if (!G) return;
+  const dt = Math.min(0.05, Math.max(0.001, ((now - lastT) / 1000) || 0.016)); lastT = now;
+  const vh = W.innerHeight, sc = W.scrollY - G.pageTop;
+  const playing = isPlaying();
+  const pulse = reduce ? 0 : beat();
+  let more = false;
+  /* playing music settles the hero whatever the scroll: in over ~2.5 s, back over ~1.5 s after a pause */
+  const pT = playing ? 1 : 0;
+  if (reduce || Math.abs(pT - playE) < 0.002) playE = pT;
+  else { playE += (pT - playE) * (1 - Math.exp(-dt * (playing ? 1.25 : 2.1))); more = true; }
+  /* untangle with the scroll through the hero's hold */
+  const mT = reduce ? 1 : Math.max(untangle(sc), playE);
+  if (reduce) mCur = 1;
+  else { mCur += (mT - mCur) * (1 - Math.exp(-dt * 7)); if (Math.abs(mT - mCur) > 0.0005) more = true; else mCur = mT; }
+  if (W.__morph) W.__morph(mCur);
+  if (introE < 1) { introE = Math.min(1, introE + dt / 1.6); more = true; }
+  if (heroVis && !D.hidden) {
+    /* the tangle drifts slowly; once the line is steady and silent, one last draw and the hero rests */
+    const busy = mCur < 0.999 || playing || playE > 0 || introE < 1;
+    if (busy || !G.H.rested) { drawHero(now / 1000, dt, pulse); G.H.rested = !busy; }
+    if (busy && !reduce) more = true;
+  }
+  if (updateThread(sc, vh, dt, pulse, false)) more = true;
+  /* player chapter steps */
+  if (G.pin) { const p = (sc - G.pin.start) / G.pin.dist; setStep(p <= 0 ? 0 : Math.min(3, Math.floor(p * 4))); }
+  else if (G.mlist) { const p = (sc + vh * 0.7 - G.mlist.top) / (G.mlist.h * 1.1); const s = clamp(Math.floor(p * 4), 0, 3); if (s !== mStepAuto) { mStepAuto = s; setStep(s); } }
+  /* depth and tilt (desktop, motion allowed) */
+  if (G.desk && !reduce) {
+    for (const it of G.par) {
+      const ty = clamp((it.c - (sc + vh / 2)) * -0.045, -22, 22);
+      if (it.ty === null || Math.abs(ty - it.ty) > 0.05) { it.ty = ty; it.el.style.transform = 'translate3d(0,' + ty.toFixed(2) + 'px,0)'; }
+    }
+    /* the panel only leans while the pointer is on it (plus a 40 px margin), never more than ~2 degrees */
+    let rx = 0, ry = 0;
+    if (mouse.on && heroVis) {
+      const P = G.panelR, x0 = P.x + G.pageLeft - W.scrollX, y0 = P.y + G.pageTop - W.scrollY + heroDy(sc), M = 40;
+      if (mouse.cx > x0 - M && mouse.cx < x0 + P.w + M && mouse.cy > y0 - M && mouse.cy < y0 + P.h + M) {
+        ry = clamp((mouse.cx - (x0 + P.w / 2)) / (P.w / 2 + M), -1, 1) * 1.8;
+        rx = clamp(-(mouse.cy - (y0 + P.h / 2)) / (P.h / 2 + M), -1, 1) * 1.4;
+      }
+    }
+    const k = 1 - Math.exp(-dt * 5);
+    tiltX += (rx - tiltX) * k; tiltY += (ry - tiltY) * k;
+    if (Math.abs(rx - tiltX) > 0.01 || Math.abs(ry - tiltY) > 0.01) more = true;
+    tiltEl.style.transform = 'perspective(1100px) rotateX(' + tiltX.toFixed(3) + 'deg) rotateY(' + tiltY.toFixed(3) + 'deg)';
+  }
+  /* music */
+  /* the panel keeps only a soft glow; the line carries the beat */
+  if (playing || playE > 0) {
+    if (playing) more = true;
+    beatEl.style.opacity = (playE * (0.18 + 0.2 * pulse)).toFixed(3);
+    beatEl.style.transform = 'translate(-50%,-50%) scale(' + (1 + 0.02 * pulse).toFixed(4) + ')';
+    pulsePath.style.transform = playing ? 'scaleY(' + (1 + 0.45 * pulse).toFixed(3) + ')' : '';
+  } else if (beatEl.style.opacity !== '0') { beatEl.style.opacity = '0'; pulsePath.style.transform = ''; }
+  /* card pulse drifts with the scroll */
+  const shift = reduce ? 0 : -((sc * 0.08) % 32.667);
+  pulseG.setAttribute('transform', 'translate(' + shift.toFixed(2) + ' 0)');
+  if (more) kick();
+}
+pulsePath.style.transformOrigin = '50% 50%';
+pulsePath.style.transformBox = 'fill-box';
+
+/* ---------- events ---------- */
+W.addEventListener('scroll', kick, { passive: true });
+let lastW = W.innerWidth, lastH = W.innerHeight;
+W.addEventListener('resize', () => {
+  const w = W.innerWidth, h = W.innerHeight;
+  if (w !== lastW || Math.abs(h - lastH) > 140) { lastW = w; lastH = h; scheduleBuild(); } else kick();
+});
+W.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; mouse.cx = e.clientX; mouse.cy = e.clientY; mouse.on = true; kick(); }, { passive: true });
+D.documentElement.addEventListener('mouseleave', () => { mouse.on = false; kick(); });
+/* the language switch rides above a hero held high: focusing it brings the page back to the top, where it shows */
+$('.topbar').addEventListener('focusin', () => { if ($('.topbar .lang').getBoundingClientRect().top < 0) W.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
+D.addEventListener('visibilitychange', () => { if (!D.hidden) { lastT = performance.now(); kick(); } });
+const onReduce = e => { reduce = e.matches; introE = 1; scheduleBuild(); };
+if (mqReduce.addEventListener) mqReduce.addEventListener('change', onReduce); else if (mqReduce.addListener) mqReduce.addListener(onReduce);
+if ('IntersectionObserver' in W) new IntersectionObserver(es => { for (const e of es) heroVis = e.isIntersecting; kick(); }, { rootMargin: '120px 0px' }).observe($('#top'));
+if ('ResizeObserver' in W) { let rh = 0; new ResizeObserver(() => { const h = pg.offsetHeight; if (Math.abs(h - rh) > 0.5) { rh = h; scheduleBuild(); } }).observe(pg); }
+$$('img').forEach(img => { if (!img.complete) img.addEventListener('load', scheduleBuild); });
+if (D.fonts && D.fonts.ready) D.fonts.ready.then(scheduleBuild);
+W.addEventListener('load', scheduleBuild);
+
+let saved = null; try { saved = localStorage.getItem('adhdmusic.lang'); } catch (e) {}
+setLang(saved === 'ko' ? 'ko' : 'en', false);
+build(); lastT = performance.now(); kick();
+
+/* ---------- hero title: ADHD Music → From scattered to steady., letters gather as the string settles ---------- */
+(() => {
+  const h1 = $('#hero-h1'), sl = $('#slogan'), wm = $('#wm');
+  if (!h1 || !sl) return;
+  const nameEl = $('.m-name', h1);
+  const SL = { en: ['From ', ['scattered', 'mut'], ' to steady.'], ko: [['흩어진', 'mut'], ' 생각이 한 줄로.'] };
+  let chars = [], cur = '', lastM = -1;
+  const rnd = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+  const ss = t => { t = clamp01(t); return t * t * (3 - 2 * t); };
+  function fit() {
+    sl.style.fontSize = '';
+    const fs = parseFloat(getComputedStyle(h1).fontSize), w = sl.scrollWidth;
+    const hr = h1.getBoundingClientRect(), pr = $('#hero-panel').getBoundingClientRect(), tr = $('#hero-text').getBoundingClientRect();
+    const avail = W.innerWidth >= BP ? Math.max(tr.width, pr.left - hr.left - 48) : tr.width;
+    if (w > avail && w > 0) sl.style.fontSize = (fs * avail / w).toFixed(2) + 'px';
+    lastM = -1;
+  }
+  function build() {
+    const l = D.documentElement.lang === 'ko' ? 'ko' : 'en';
+    if (l === cur) return; cur = l;
+    sl.textContent = ''; chars = [];
+    let i = 0;
+    for (const part of SL[l]) {
+      const [txt, cls] = Array.isArray(part) ? part : [part, ''];
+      for (const c of txt) {
+        const sp = D.createElement('span'); sp.className = 'ch' + (cls ? ' ' + cls : ''); sp.textContent = c; sl.appendChild(sp);
+        chars.push({ sp, x: (rnd(i) - 0.5) * 150, y: (rnd(i + 31) - 0.5) * 96, r: (rnd(i + 57) - 0.5) * 70, d: rnd(i + 89) * 0.35 });
+        i++;
+      }
+    }
+    fit();
+  }
+  W.__morph = m => {
+    if (Math.abs(m - lastM) < 0.002) return; lastM = m;
+    const a = ss((m - 0.3) / 0.3), b = ss((m - 0.45) / 0.45);
+    nameEl.style.opacity = (1 - a).toFixed(3);
+    nameEl.style.filter = a > 0.001 && a < 0.999 ? 'blur(' + (a * 8).toFixed(2) + 'px)' : '';
+    nameEl.style.transform = a > 0.001 ? 'translateY(' + (-a * 12).toFixed(1) + 'px)' : '';
+    for (const c of chars) {
+      const e0 = clamp01(b * 1.35 - c.d), e = 1 - Math.pow(1 - e0, 3), k = 1 - e;
+      c.sp.style.opacity = e.toFixed(3);
+      c.sp.style.transform = k < 0.001 ? '' : 'translate(' + (c.x * k).toFixed(1) + 'px,' + (c.y * k).toFixed(1) + 'px) rotate(' + (c.r * k).toFixed(1) + 'deg)';
+    }
+    if (wm) wm.style.opacity = b.toFixed(3);
+  };
+  build();
+  $$('[data-lang-btn]').forEach(bt => bt.addEventListener('click', () => { build(); W.__morph(mCur); }));
+  W.addEventListener('resize', fit);
+  if (D.fonts && D.fonts.ready) D.fonts.ready.then(fit);
+  W.__morph(reduce ? 1 : mCur);
+})();
+
+/* ---------- 01: the four rules step past the still column; the list of studies on request ---------- */
+(() => {
+  const ol = $('#studies'), btn = $('#res-more'), lbl = $('#res-more-l');
+  if (ol && btn) {
+    const L = { en: ['See all 23 studies', 'Hide the list'], ko: ['연구 23편 모두 보기', '목록 접기'] };
+    const upd = () => { lbl.textContent = L[D.documentElement.lang === 'ko' ? 'ko' : 'en'][ol.hidden ? 0 : 1]; btn.setAttribute('aria-expanded', String(!ol.hidden)); };
+    btn.addEventListener('click', () => { ol.hidden = !ol.hidden; upd(); scheduleBuild(); });
+    $$('[data-lang-btn]').forEach(b => b.addEventListener('click', upd));
+    upd();
+  }
+  const rules = $$('#rules .rule'), track = $('#rules-track'), stage = $('#rules-stage'), dots = $$('.rule-dots i');
+  if (rules.length && track && stage) {
+    let cur = -2;
+    const set = i => {
+      if (i === cur) return;
+      cur = i;
+      rules.forEach((r, k) => { r.classList.toggle('on', i < 0 || k === i); r.classList.toggle('past', i >= 0 && k < i); });
+      dots.forEach((d, k) => d.classList.toggle('on', k === i));
+    };
+    const upd = () => {
+      if (W.innerWidth < BP || reduce) { set(-1); return; }
+      const r = track.getBoundingClientRect(), st = stage.getBoundingClientRect(), span = r.height - st.height;
+      const p = span > 0 ? (st.top - r.top) / span : 0;
+      set(Math.min(3, Math.max(0, Math.floor(p * 4 + 0.0001))));
+    };
+    let tk = 0;
+    const onScroll = () => { if (!tk) tk = requestAnimationFrame(() => { tk = 0; upd(); }); };
+    W.addEventListener('scroll', onScroll, { passive: true });
+    W.addEventListener('resize', onScroll);
+    upd();
+  }
+  const n = $('#res-n');
+  if (n && !reduce && 'IntersectionObserver' in W) {
+    let done = false;
+    const io2 = new IntersectionObserver(es => {
+      for (const e of es) {
+        if (!e.isIntersecting || done) continue; done = true; io2.disconnect();
+        const t0 = performance.now();
+        const step = t => { const k = Math.min(1, (t - t0) / 1100), v = Math.round(23 * (1 - Math.pow(1 - k, 3))); n.textContent = v; if (k < 1) requestAnimationFrame(step); };
+        n.textContent = '0'; requestAnimationFrame(step);
+      }
+    }, { threshold: 0.6 });
+    io2.observe(n);
+  }
+})();
+
+/* ---------- tour video: muted while in view, sound only on request, never over Listen ---------- */
+(() => {
+  const v = $('#tour'), fig = $('#vid-wrap'), btn = $('#vid-sound'), lbl = $('#vid-sound-l'), sc = $('#scrub'), fill = $('#scrub-fill');
+  if (!v || !btn) return;
+  const L = { en: ['Sound on', 'Sound off', 'Play with sound'], ko: ['소리 켜기', '소리 끄기', '소리와 함께 보기'] };
+  const lg = () => D.documentElement.lang === 'ko' ? 'ko' : 'en';
+  let key = '', inView = false;
+  function label() {
+    const t = L[lg()];
+    lbl.textContent = v.paused && (reduce || !inView) && v.muted ? (reduce ? t[2] : t[0]) : (v.muted ? t[0] : t[1]);
+    btn.setAttribute('aria-pressed', String(!v.muted && !v.paused));
+  }
+  function pick() {
+    const narrow = W.innerWidth < BP, k = (narrow ? 'd' : 'b') + '-' + lg();
+    if (k === key) return; key = k;
+    const muted = v.muted, playing = !v.paused;
+    v.poster = 'assets/video/poster-' + k + '.jpg';
+    v.src = 'assets/video/' + k + '.mp4';
+    fig.classList.toggle('v916', narrow);
+    v.muted = muted;
+    if (playing || (inView && !reduce)) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+    scheduleBuild();
+  }
+  function toggleSound() {
+    if (v.paused || v.muted) {
+      v.muted = false;
+      if (isPlaying()) audio.pause();
+      const p = v.play(); if (p && p.catch) p.catch(() => {});
+    } else { v.muted = true; if (reduce) v.pause(); }
+    label();
+  }
+  btn.addEventListener('click', toggleSound);
+  v.addEventListener('click', toggleSound);
+  ['play', 'pause', 'volumechange'].forEach(e => v.addEventListener(e, label));
+  listenBtn.addEventListener('click', () => setTimeout(() => { if (isPlaying() && !v.muted) { v.muted = true; label(); } }, 0));
+  if ('IntersectionObserver' in W) new IntersectionObserver(es => {
+    for (const e of es) {
+      inView = e.isIntersecting;
+      if (inView && !reduce) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+      else if (!inView) { v.muted = true; if (!v.paused) v.pause(); }
+      label();
+    }
+  }, { threshold: 0.35 }).observe(v);
+  D.addEventListener('visibilitychange', () => { if (D.hidden && !v.paused) v.pause(); });
+  $$('[data-lang-btn]').forEach(b => b.addEventListener('click', () => { pick(); label(); }));
+  let rt = 0; W.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(pick, 200); });
+  /* position bar: follows the video, click or drag to move, arrow keys step 5 s */
+  if (sc && fill) {
+    let raf = 0, drag = false;
+    const fmtT = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+    const paint = () => { const d = v.duration || 45, t = v.currentTime || 0; fill.style.width = (100 * Math.min(1, t / d)).toFixed(2) + '%'; sc.setAttribute('aria-valuemax', String(Math.round(d))); sc.setAttribute('aria-valuenow', String(Math.round(t))); sc.setAttribute('aria-valuetext', fmtT(t)); };
+    const loop = () => { paint(); raf = !v.paused || drag ? requestAnimationFrame(loop) : 0; };
+    const kickBar = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    const seekAt = x => { const r = sc.getBoundingClientRect(), k = Math.min(1, Math.max(0, (x - r.left) / r.width)); if (v.duration) v.currentTime = k * v.duration; paint(); };
+    sc.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); drag = true; sc.classList.add('drag'); try { sc.setPointerCapture(e.pointerId); } catch (_) {} seekAt(e.clientX); kickBar(); });
+    sc.addEventListener('pointermove', e => { if (drag) seekAt(e.clientX); });
+    const end = () => { drag = false; sc.classList.remove('drag'); };
+    sc.addEventListener('pointerup', end); sc.addEventListener('pointercancel', end);
+    sc.addEventListener('keydown', e => {
+      const d = v.duration || 45; let t = v.currentTime;
+      if (e.key === 'ArrowRight') t += 5; else if (e.key === 'ArrowLeft') t -= 5; else if (e.key === 'Home') t = 0; else if (e.key === 'End') t = d - 0.1; else return;
+      e.preventDefault(); v.currentTime = Math.min(d - 0.1, Math.max(0, t)); paint();
+    });
+    ['play', 'seeked', 'loadedmetadata', 'timeupdate'].forEach(ev => v.addEventListener(ev, () => { paint(); if (!v.paused) kickBar(); }));
+  }
+  pick(); label();
+})();
+
+
+/* ---------- the play ring drawn in the panel: clicking it plays the clip, like the app's play button ---------- */
+(() => {
+  const hp = $('#hs-play');
+  if (hp) hp.addEventListener('click', e => { e.preventDefault(); listenBtn.click(); });
+})();
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/download",
+      "destination": "https://github.com/lazydevz-inc/adhd-music/releases/latest/download/ADHD-Music.dmg",
+      "permanent": false
+    },
+    {
+      "source": "/updates/:file",
+      "destination": "https://github.com/lazydevz-inc/adhd-music/releases/download/updates/:file",
+      "permanent": false
+    },
+    {
+      "source": "/github",
+      "destination": "https://github.com/lazydevz-inc/adhd-music",
+      "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/appcast.xml",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "notes": "Copy this file to Scripts/library-sources.json and list your own songs, then run Scripts/build_library.py. path: relative to the repository root (Audio/ is git-ignored, a good place for your files) or absolute. genre: lofi, grooves or electronic. status: new (shows the New tag) or inMix. about (optional): vibe is the one-line description shown under the song in the playlist; loop is a longer line kept in the catalog; both in English and Korean. source.songId: optional; a cover picture at Audio/Covers/suno/<songId>.jpeg is used when it exists, otherwise colours are drawn. palette (optional): three \"#RRGGBB\" colours for the player's background; without it they come from the cover, or are picked for you.",
+ "tracks": [
+  {
+   "id": "my-first-loop",
+   "title": "My First Loop",
+   "genre": "lofi",
+   "path": "Audio/Songs/my-first-loop.wav",
+   "status": "new",
+   "about": {
+    "vibe": {
+     "en": "Warm lo-fi beat",
+     "ko": "따뜻한 로파이 비트"
+    },
+    "loop": {
+     "en": "One soft pattern on repeat, no tune to follow. It stays in the background.",
+     "ko": "부드러운 패턴 하나가 계속 돌아요. 따라갈 멜로디가 없어 배경에 머물러요."
+    }
+   },
+   "source": {
+    "songId": "my-first-loop"
+   }
+  },
+  {
+   "id": "night-drive",
+   "title": "Night Drive",
+   "genre": "electronic",
+   "path": "Audio/Songs/night-drive.flac",
+   "status": "new"
+  }
+ ]
+}

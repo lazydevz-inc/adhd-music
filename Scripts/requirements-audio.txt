@@ -1,0 +1,7 @@
+# Python packages for the song library scripts (Scripts/build_library.py and the scripts it imports).
+# Also needed: ffmpeg and ffprobe on PATH (for example: brew install ffmpeg).
+# These pins support Python 3.9 to 3.12; macOS's own /usr/bin/python3 is 3.9:
+#   /usr/bin/python3 -m venv .venv-audio && .venv-audio/bin/pip install -r Scripts/requirements-audio.txt
+numpy==2.0.2
+scipy==1.13.1
+soundfile==0.13.1
