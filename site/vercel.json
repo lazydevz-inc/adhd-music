@@ -18,16 +18,25 @@
       "permanent": false
     }
   ],
-  "headers": [
+  "rewrites": [
     {
       "source": "/appcast.xml",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=300, must-revalidate"
-        }
-      ]
+      "destination": "/api/appcast"
     },
+    {
+      "source": "/ingest/static/:path*",
+      "destination": "https://us-assets.i.posthog.com/static/:path*"
+    },
+    {
+      "source": "/ingest/array/:path*",
+      "destination": "https://us-assets.i.posthog.com/array/:path*"
+    },
+    {
+      "source": "/ingest/:path*",
+      "destination": "https://us.i.posthog.com/:path*"
+    }
+  ],
+  "headers": [
     {
       "source": "/assets/(.*)",
       "headers": [

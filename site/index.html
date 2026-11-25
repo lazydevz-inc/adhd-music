@@ -23,6 +23,20 @@
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture register register_once unregister identify reset get_distinct_id get_session_id startSessionRecording stopSessionRecording opt_in_capturing opt_out_capturing has_opted_out_capturing set_config".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init('phc_rSmjaBgCTVpeoZ4uNE7SBmyA5mBSHBGUWAxnZKjBFxm3', {
+  api_host: '/ingest',
+  ui_host: 'https://us.posthog.com',
+  persistence: 'memory',
+  person_profiles: 'identified_only',
+  capture_pageview: true,
+  capture_pageleave: true,
+  autocapture: true,
+  disable_surveys: true,
+  session_recording: { maskAllInputs: true }
+});
+</script>
 </head>
 <body>
 <style>
@@ -555,12 +569,6 @@ body{margin:0;background:#FFFFFF;color:#14161A;overflow-x:clip}
 
 <header class="wrap topbar">
   <div class="inner">
-    <div class="lang" role="group" aria-label="Language">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-globe"/></svg>
-      <button type="button" id="lang-en" data-lang-btn="en" aria-pressed="true" lang="en">EN</button>
-      <span class="sep" aria-hidden="true">·</span>
-      <button type="button" id="lang-ko" data-lang-btn="ko" aria-pressed="false" lang="ko" aria-label="한국어">KO</button>
-    </div>
   </div>
 </header>
 
@@ -882,11 +890,6 @@ body{margin:0;background:#FFFFFF;color:#14161A;overflow-x:clip}
         <a class="q" id="dl-foot" href="#install" data-href="/download"><span class="uq" data-i="fDl">Download</span></a>
         <a class="q" id="gh-foot" href="#" data-href="https://github.com/lazydevz-inc/adhd-music"><span class="uq">GitHub</span></a>
         <a class="q" id="pv-foot" href="/privacy"><span class="uq" data-i="fPv">Privacy</span></a>
-        <div class="lang" role="group" aria-label="Language">
-          <button type="button" id="lang-en-foot" data-lang-btn="en" aria-pressed="true" lang="en">EN</button>
-          <span class="sep" aria-hidden="true">·</span>
-          <button type="button" id="lang-ko-foot" data-lang-btn="ko" aria-pressed="false" lang="ko" aria-label="한국어">KO</button>
-        </div>
       </div>
     </div>
   </div>
@@ -1231,8 +1234,6 @@ function frameHold(desk, vh) {
     lower = -pick.e;
     t = pick.e === nameEdge ? clamp(vh - (rel(panel).b + 16), lower, 0) : lower;
   }
-  const L = rel($('.topbar .lang'));
-  if (t + L.t < st && t + L.b > 0) t = Math.max(-rel($('.topbar')).b, lower);
   return Math.round(t);
 }
 function scheduleBuild() { if (buildQueued) return; buildQueued = true; requestAnimationFrame(() => { buildQueued = false; build(); kick(); }); }
@@ -1630,8 +1631,6 @@ W.addEventListener('resize', () => {
 });
 W.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; mouse.cx = e.clientX; mouse.cy = e.clientY; mouse.on = true; kick(); }, { passive: true });
 D.documentElement.addEventListener('mouseleave', () => { mouse.on = false; kick(); });
-/* the language switch rides above a hero held high: focusing it brings the page back to the top, where it shows */
-$('.topbar').addEventListener('focusin', () => { if ($('.topbar .lang').getBoundingClientRect().top < 0) W.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
 D.addEventListener('visibilitychange', () => { if (!D.hidden) { lastT = performance.now(); kick(); } });
 const onReduce = e => { reduce = e.matches; introE = 1; scheduleBuild(); };
 if (mqReduce.addEventListener) mqReduce.addEventListener('change', onReduce); else if (mqReduce.addListener) mqReduce.addListener(onReduce);
@@ -1641,8 +1640,8 @@ $$('img').forEach(img => { if (!img.complete) img.addEventListener('load', sched
 if (D.fonts && D.fonts.ready) D.fonts.ready.then(scheduleBuild);
 W.addEventListener('load', scheduleBuild);
 
-let saved = null; try { saved = localStorage.getItem('adhdmusic.lang'); } catch (e) {}
-setLang(saved === 'ko' ? 'ko' : 'en', false);
+// English only since 11/25 (the owner's call): no language switch, and an earlier Korean choice is ignored.
+setLang('en', false);
 build(); lastT = performance.now(); kick();
 
 /* ---------- hero title: ADHD Music → From scattered to steady., letters gather as the string settles ---------- */
@@ -1821,5 +1820,47 @@ build(); lastT = performance.now(); kick();
 })();
 </script>
 
+<script>
+(function () {
+  var D = document;
+  function send(name, props) { try { if (window.posthog && window.posthog.capture) window.posthog.capture(name, props || {}); } catch (e) {} }
+  D.addEventListener('click', function (ev) {
+    var t = ev.target && ev.target.closest ? ev.target.closest('a,button,#hs-play') : null;
+    if (!t) return;
+    var id = t.id || '';
+    if (/^dl-/.test(id)) send('download_clicked', { position: id.slice(3) });
+    else if (/^gh-/.test(id)) send('github_clicked', { position: id.slice(3) });
+    else if (id === 'listen') send('listen_clicked', { was_playing: t.getAttribute('aria-pressed') === 'true' });
+    else if (id === 'hs-play') send('panel_play_clicked');
+    else if (id === 'vid-sound') send('video_sound_clicked', { turning_on: t.getAttribute('aria-pressed') !== 'true' });
+    else if (id === 'res-more') send('studies_list_clicked', { opening: t.getAttribute('aria-expanded') !== 'true' });
+    else if (t.hasAttribute('data-lang-btn')) send('language_clicked', { lang: t.getAttribute('data-lang-btn') });
+    else if (t.closest('#studies')) send('study_opened', { title: t.getAttribute('title') || t.textContent.trim() });
+    else if (id === 'pv-foot') send('privacy_clicked');
+  }, true);
+  if ('IntersectionObserver' in window) {
+    var seen = {}, order = 0;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var id = en.target.id;
+        if (!en.isIntersecting || seen[id]) return;
+        seen[id] = true; order += 1;
+        send('section_viewed', { section: id, order: order });
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });   // counted when the section reaches the middle of the screen (works for tall, pinned sections too)
+    D.querySelectorAll('section[id]').forEach(function (s) { io.observe(s); });
+  }
+  var v = D.getElementById('tour');
+  if (v) {
+    var marks = [25, 50, 75, 95], hit = {};
+    v.addEventListener('timeupdate', function () {
+      if (!v.duration) return;
+      var pct = v.currentTime / v.duration * 100;
+      marks.forEach(function (m) { if (pct >= m && !hit[m]) { hit[m] = true; send('video_progress', { percent: m, muted: v.muted }); } });
+    });
+  }
+})();
+</script>
 </body>
 </html>
