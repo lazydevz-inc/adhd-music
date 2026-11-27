@@ -34,7 +34,8 @@ posthog.init('phc_rSmjaBgCTVpeoZ4uNE7SBmyA5mBSHBGUWAxnZKjBFxm3', {
   capture_pageleave: true,
   autocapture: true,
   disable_surveys: true,
-  session_recording: { maskAllInputs: true }
+  session_recording: { maskAllInputs: true },
+  before_send: function (e) { if (e && e.properties) e.properties.automated = navigator.webdriver === true; return e; }
 });
 </script>
 </head>
@@ -1824,6 +1825,15 @@ build(); lastT = performance.now(); kick();
 (function () {
   var D = document;
   function send(name, props) { try { if (window.posthog && window.posthog.capture) window.posthog.capture(name, props || {}); } catch (e) {} }
+  // A person, not a crawler: the first click or tap, or scrolling on to a second section. Crawlers that scan new
+  // sites load the page and leave within seconds without either, so 'visit_human' counts people. Once per visit.
+  var human = false;
+  function markHuman(how) {
+    if (human || navigator.webdriver === true) return;
+    human = true;
+    send('visit_human', { how: how });
+  }
+  D.addEventListener('pointerdown', function () { markHuman('click'); }, true);
   D.addEventListener('click', function (ev) {
     var t = ev.target && ev.target.closest ? ev.target.closest('a,button,#hs-play') : null;
     if (!t) return;
@@ -1846,6 +1856,7 @@ build(); lastT = performance.now(); kick();
         if (!en.isIntersecting || seen[id]) return;
         seen[id] = true; order += 1;
         send('section_viewed', { section: id, order: order });
+        if (order >= 2) markHuman('scroll');
         io.unobserve(en.target);
       });
     }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });   // counted when the section reaches the middle of the screen (works for tall, pinned sections too)
